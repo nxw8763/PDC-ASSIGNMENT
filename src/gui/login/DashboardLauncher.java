@@ -43,14 +43,16 @@ public class DashboardLauncher {
                     new TicketManagementService(new TicketDAO())
             );
 
-        } else {
+        } else if (user instanceof Admin admin) {
 
             dashboard = new AdminDashboardPanel(
-                    user,
+                    admin,
                     userService,
                     new TicketManagementService(new TicketDAO()),
                     new CategoryService(new CategoryDAO())
             );
+        } else {
+        	return;
         }
 
         dashboard.setLogoutAction(() -> {

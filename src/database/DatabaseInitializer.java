@@ -1,13 +1,13 @@
 package database;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseInitializer {
 
 	public static void initialize() {
-
 	    try (
 	            Connection conn = DatabaseConnection.getConnection();
 	            Statement stmt = conn.createStatement()
@@ -25,6 +25,24 @@ public class DatabaseInitializer {
 	    }
 	}
 	
+	//debug tool
+	public static void resetDatabase() {
+
+	    try (
+	            Connection conn = DatabaseConnection.getConnection();
+	            Statement stmt = conn.createStatement()
+	    ) {
+
+	        stmt.executeUpdate("DROP TABLE COMMENTS");
+	        stmt.executeUpdate("DROP TABLE TICKETS");
+	        stmt.executeUpdate("DROP TABLE USERS");
+	        stmt.executeUpdate("DROP TABLE CATEGORIES");
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
 	private static void seedData(Connection conn) {
 
 	    try (Statement stmt = conn.createStatement()) {
@@ -32,44 +50,50 @@ public class DatabaseInitializer {
 	        // -------------------
 	        // USERS
 	        // -------------------
-	        stmt.executeUpdate("""
-	            INSERT INTO USERS (USERNAME, PASSWORD, ROLE, NAME, EMAIL)
-	            VALUES
-	            ('admin', 'admin123', 'ADMIN', 'System Admin', 'admin@sys.com')
-	        """);
-
-	        stmt.executeUpdate("""
-	            INSERT INTO USERS (USERNAME, PASSWORD, ROLE, NAME, EMAIL)
-	            VALUES
-	            ('tech1', '1234', 'TECHNICIAN', 'John Tech', 'tech1@sys.com')
-	        """);
-
-	        stmt.executeUpdate("""
-	            INSERT INTO USERS (USERNAME, PASSWORD, ROLE, NAME, EMAIL)
-	            VALUES
-	            ('emp1', '1234', 'EMPLOYEE', 'Jane Employee', 'emp1@sys.com')
-	        """);
-
+	    	ResultSet userTable = stmt.executeQuery("SELECT COUNT(*) FROM USERS");
+	    	userTable.next();
+	    	if(userTable.getInt(1) == 0) {
+	    		stmt.executeUpdate("""
+		            INSERT INTO USERS (USERNAME, PASSWORD, ROLE, NAME, EMAIL)
+		            VALUES
+		            ('admin', 'admin123', 'ADMINISTRATOR', 'System Admin', 'admin@sys.com')
+		        """);
+	
+		        stmt.executeUpdate("""
+		            INSERT INTO USERS (USERNAME, PASSWORD, ROLE, NAME, EMAIL)
+		            VALUES
+		            ('tech1', '1234', 'TECHNICIAN', 'John Tech', 'tech1@sys.com')
+		        """);
+	
+		        stmt.executeUpdate("""
+		            INSERT INTO USERS (USERNAME, PASSWORD, ROLE, NAME, EMAIL)
+		            VALUES
+		            ('emp1', '1234', 'EMPLOYEE', 'Jane Employee', 'emp1@sys.com')
+		        """);
+		        System.out.println("user data inserted.");
+	    	}
 	        // -------------------
 	        // CATEGORIES
 	        // -------------------
-	        stmt.executeUpdate("""
-	            INSERT INTO CATEGORIES (CATEGORY_NAME)
-	            VALUES ('Hardware')
-	        """);
-
-	        stmt.executeUpdate("""
-	            INSERT INTO CATEGORIES (CATEGORY_NAME)
-	            VALUES ('Software')
-	        """);
-
-	        stmt.executeUpdate("""
-	            INSERT INTO CATEGORIES (CATEGORY_NAME)
-	            VALUES ('Network')
-	        """);
-
-	        System.out.println("Seed data inserted.");
-
+	    	ResultSet categoryTable = stmt.executeQuery("SELECT COUNT(*) FROM CATEGORIES");
+	    	categoryTable.next();
+	    	if(categoryTable.getInt(1) == 0) {
+		        stmt.executeUpdate("""
+		            INSERT INTO CATEGORIES (CATEGORY_NAME)
+		            VALUES ('Hardware')
+		        """);
+	
+		        stmt.executeUpdate("""
+		            INSERT INTO CATEGORIES (CATEGORY_NAME)
+		            VALUES ('Software')
+		        """);
+	
+		        stmt.executeUpdate("""
+		            INSERT INTO CATEGORIES (CATEGORY_NAME)
+		            VALUES ('Network')
+		        """);
+	        	System.out.println("category data inserted.");
+	    	}
 	    } catch (SQLException e) {
 	        System.out.println("Seed data already exists or failed:");
 	        e.printStackTrace();

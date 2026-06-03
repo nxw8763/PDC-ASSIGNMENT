@@ -1,5 +1,7 @@
 package gui.admin;
 
+import model.Admin;
+import model.Status;
 import model.Ticket;
 import service.TicketManagementService;
 
@@ -8,38 +10,116 @@ import java.awt.*;
 
 public class AdminTicketDetailsDialog extends JDialog {
 
+    private final Ticket ticket;
+    private final Admin admin;
+    private final TicketManagementService service;
+
+    private JTextArea area;
+
     public AdminTicketDetailsDialog(
             Window owner,
             Ticket ticket,
+            Admin admin,
             TicketManagementService service
     ) {
 
-        super(owner, "Ticket Details", ModalityType.APPLICATION_MODAL);
+        super(
+                owner,
+                "Ticket Details",
+                ModalityType.APPLICATION_MODAL
+        );
+
+        this.ticket = ticket;
+        this.admin = admin;
+        this.service = service;
+
+        initialise();
+    }
+
+    private void initialise() {
 
         setLayout(new BorderLayout());
 
-        JTextArea area = new JTextArea();
+        area = new JTextArea();
         area.setEditable(false);
 
-        area.setText(
-                ticket.getTicketID() + "\n" +
-                ticket.getTitle() + "\n" +
-                ticket.getStatus() + "\n" +
-                ticket.getPriority() + "\n" +
-                ticket.getCategory()
+        refreshText();
+
+        JPanel buttons =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT
+                        )
+                );
+
+        JButton closeButton =
+                new JButton("Close Ticket");
+
+        JButton reopenButton =
+                new JButton("Reopen");
+
+        buttons.add(closeButton);
+        buttons.add(reopenButton);
+
+        closeButton.addActionListener(
+                e -> closeTicket()
         );
 
-        JButton close = new JButton("Close Ticket");
+        reopenButton.addActionListener(
+                e -> reopenTicket()
+        );
 
-        close.addActionListener(e -> {
-            service.closeTicket(ticket.getTicketID());
-            dispose();
-        });
+        add(
+                new JScrollPane(area),
+                BorderLayout.CENTER
+        );
 
-        add(new JScrollPane(area), BorderLayout.CENTER);
-        add(close, BorderLayout.SOUTH);
+        add(
+                buttons,
+                BorderLayout.SOUTH
+        );
 
-        setSize(400,300);
-        setLocationRelativeTo(owner);
+        setSize(500, 350);
+        setLocationRelativeTo(getOwner());
+    }
+
+    private void refreshText() {
+
+        area.setText(
+                "Ticket ID: " + ticket.getTicketID() + "\n\n" +
+                "Title: " + ticket.getTitle() + "\n" +
+                "Category: " + ticket.getCategory() + "\n" +
+                "Priority: " + ticket.getPriority() + "\n" +
+                "Status: " + ticket.getStatus() + "\n"
+        );
+    }
+
+    private void closeTicket() {
+
+        service.closeTicket(
+                ticket.getTicketID(),
+                admin
+        );
+
+        ticket.setStatus(
+                Status.CLOSED
+        );
+
+        refreshText();
+    }
+
+    private void reopenTicket() {
+
+        service.updateStatus(
+                ticket.getTicketID(),
+                Status.OPEN,
+                admin
+        );
+
+        ticket.setStatus(
+                Status.OPEN
+        );
+
+        refreshText();
     }
 }

@@ -1,25 +1,29 @@
 package gui.admin;
 
 import gui.abstracts.AbstractDashboardPanel;
-import model.User;
+import model.Admin;
 import service.CategoryService;
 import service.TicketManagementService;
 import service.UserManagementService;
 
 public class AdminDashboardPanel extends AbstractDashboardPanel {
 
+    private final Admin admin;
+
     private final UserManagementService userService;
     private final TicketManagementService ticketService;
     private final CategoryService categoryService;
 
     public AdminDashboardPanel(
-            User user,
+            Admin admin,
             UserManagementService userService,
             TicketManagementService ticketService,
             CategoryService categoryService
     ) {
 
-        super(user);
+        super(admin);
+
+        this.admin = admin;
 
         this.userService = userService;
         this.ticketService = ticketService;
@@ -44,7 +48,10 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
 
         registerPage(
                 "tickets",
-                new AdminTicketsPanel(ticketService)
+                new AdminTicketsPanel(
+                        admin,
+                        ticketService
+                )
         );
 
         registerPage(

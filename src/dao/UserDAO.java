@@ -193,7 +193,7 @@ public class UserDAO {
             case "TECHNICIAN" ->
                     new Technician(id, username, name, email);
 
-            case "ADMIN" ->
+            case "ADMINISTRATOR" ->
                     new Admin(id, username, name, email);
 
             default -> null;
