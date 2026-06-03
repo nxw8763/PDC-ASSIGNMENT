@@ -205,6 +205,36 @@ public class TicketManagementService {
         }
     }
     
+    public void unassignTicket(
+            int ticketID,
+            Technician technician
+    ) {
+
+        List<Ticket> tickets =
+                database.fetchTickets();
+
+        for (Ticket t : tickets) {
+
+            if (t.getTicketID() == ticketID) {
+
+                if (!technicianCanModifyTicket(
+                        t,
+                        technician
+                )) {
+                    return;
+                }
+
+                t.assignTechnician("");
+                t.setStatus(Status.OPEN);
+
+                database.updateTicket(t);
+
+                return;
+            }
+        }
+    }
+    
+    
     public void generateReport() {
 
         List<Ticket> tickets = database.fetchTickets();

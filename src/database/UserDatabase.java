@@ -122,7 +122,7 @@ public class UserDatabase {
         }
     }
     
-    public User authenticate(String role, String username, String password) {
+    public User authenticate(String username, String password) {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE))) {
 
@@ -137,7 +137,7 @@ public class UserDatabase {
                 String fileRole = parts[3];
 
                 if (fileUsername.equals(username)
-                        && filePassword.equals(password) && fileRole.equals(role)) {
+                        && filePassword.equals(password)) {
 
                     int id = Integer.parseInt(parts[0]);
                     String name = parts[4];
