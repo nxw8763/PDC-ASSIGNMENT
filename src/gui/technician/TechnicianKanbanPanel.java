@@ -23,7 +23,6 @@ public class TechnicianKanbanPanel extends JPanel {
             Technician technician,
             TicketManagementService ticketService
     ) {
-
         this.technician = technician;
         this.ticketService = ticketService;
 
@@ -34,39 +33,20 @@ public class TechnicianKanbanPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        JPanel boardPanel = new JPanel(
-                new GridLayout(1, 4, 15, 0)
-        );
+        JPanel boardPanel = new JPanel(new GridLayout(1, 4, 15, 0));
+        boardPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        boardPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        15,
-                        15,
-                        15,
-                        15
-                )
-        );
-
-        openColumn =
-                new KanbanColumnPanel("OPEN");
-
-        assignedColumn =
-                new KanbanColumnPanel("ASSIGNED");
-
-        progressColumn =
-                new KanbanColumnPanel("IN PROGRESS");
-
-        resolvedColumn =
-                new KanbanColumnPanel("RESOLVED");
+        openColumn = new KanbanColumnPanel("OPEN");
+        assignedColumn = new KanbanColumnPanel("ASSIGNED");
+        progressColumn = new KanbanColumnPanel("IN PROGRESS");
+        resolvedColumn = new KanbanColumnPanel("RESOLVED");
 
         boardPanel.add(openColumn);
         boardPanel.add(assignedColumn);
         boardPanel.add(progressColumn);
         boardPanel.add(resolvedColumn);
 
-        JScrollPane scrollPane =
-                new JScrollPane(boardPanel);
-
+        JScrollPane scrollPane = new JScrollPane(boardPanel);
         scrollPane.setBorder(null);
 
         add(scrollPane, BorderLayout.CENTER);
@@ -81,53 +61,42 @@ public class TechnicianKanbanPanel extends JPanel {
         progressColumn.clearTickets();
         resolvedColumn.clearTickets();
 
-        List<Ticket> tickets =
-                ticketService.getAllTickets();
+        List<Ticket> tickets = ticketService.getAllTickets();
 
         for (Ticket ticket : tickets) {
 
-        	TechnicianTicketCard card =
-        	        new TechnicianTicketCard(ticket);
+            String assignedLabel =
+                    (ticket.getAssignedTechnicianID() == 0)
+                            ? "Unassigned"
+                            : "Technician ID: " + ticket.getAssignedTechnicianID();
 
-        	card.addCardClickListener(() -> {
+            TechnicianTicketCard card =
+                    new TechnicianTicketCard(ticket, assignedLabel);
 
-        	    Window window =
-        	            SwingUtilities.getWindowAncestor(
-        	                    TechnicianKanbanPanel.this
-        	            );
+            card.addCardClickListener(() -> {
 
-        	    TechnicianTicketDetailsDialog dialog =
-        	            new TechnicianTicketDetailsDialog(
-        	                    window,
-        	                    ticket,
-        	                    technician,
-        	                    ticketService
-        	            );
+                Window window =
+                        SwingUtilities.getWindowAncestor(this);
 
-        	    dialog.setVisible(true);
+                TechnicianTicketDetailsDialog dialog =
+                        new TechnicianTicketDetailsDialog(
+                                window,
+                                ticket,
+                                technician,
+                                ticketService
+                        );
 
-        	    loadTickets();
-        	});
+                dialog.setVisible(true);
 
-            Status status =
-                    ticket.getStatus();
+                loadTickets();
+            });
 
-            switch (status) {
+            switch (ticket.getStatus()) {
 
-                case OPEN ->
-                        openColumn.addTicket(card);
-
-                case ASSIGNED ->
-                        assignedColumn.addTicket(card);
-
-                case IN_PROGRESS ->
-                        progressColumn.addTicket(card);
-
-                case RESOLVED ->
-                        resolvedColumn.addTicket(card);
-
-                default -> {
-                }
+                case OPEN -> openColumn.addTicket(card);
+                case ASSIGNED -> assignedColumn.addTicket(card);
+                case IN_PROGRESS -> progressColumn.addTicket(card);
+                case RESOLVED -> resolvedColumn.addTicket(card);
             }
         }
 
@@ -137,11 +106,7 @@ public class TechnicianKanbanPanel extends JPanel {
 
     @Override
     public void setVisible(boolean visible) {
-
         super.setVisible(visible);
-
-        if (visible) {
-            loadTickets();
-        }
+        if (visible) loadTickets();
     }
 }

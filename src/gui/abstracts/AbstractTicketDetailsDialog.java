@@ -151,9 +151,9 @@ public abstract class AbstractTicketDetailsDialog extends JDialog {
 
         technicianLabel.setText(
                 "Assigned Technician: "
-                        + (ticket.getAssignedTechnician().isBlank()
+                        + (ticket.getAssignedTechnicianID() == 0
                         ? "Unassigned"
-                        : ticket.getAssignedTechnician())
+                        : String.valueOf(ticket.getAssignedTechnicianID()))
         );
 
         createdLabel.setText(

@@ -17,7 +17,7 @@ public class Ticket {
 
     private int createdByUserID;
 
-    private String assignedTechnician = "";
+    private int assignedTechnicianID;
 
     private List<Comment> comments;
 
@@ -43,8 +43,8 @@ public class Ticket {
         comments.add(comment);
     }
 
-    public void assignTechnician(String tech) {
-        this.assignedTechnician = tech;
+    public void setAssignedTechnicianID(int techID) {
+        this.assignedTechnicianID = techID;
     }
 
     public void setStatus(Status status) {
@@ -58,6 +58,10 @@ public class Ticket {
     public void setPriority(Priority priority) {
         this.priority = priority;
     }
+    public void setTicketID(int id) {
+    	this.ticketID = id;
+    }
+    
     /* GETTERS */
 
     public int getTicketID() {
@@ -95,43 +99,8 @@ public class Ticket {
         return category;
     }
     
-    public String getAssignedTechnician() {
-    	return this.assignedTechnician;
+    public int getAssignedTechnicianID() {
+    	return this.assignedTechnicianID;
     }
-    
-    public void printTicket() {
 
-        System.out.println("=================================================");
-        System.out.println("                 SUPPORT TICKET                  ");
-        System.out.println("=================================================");
-
-        System.out.printf("%-18s : %d\n", "Ticket ID", ticketID);
-        System.out.printf("%-18s : %s\n", "Title", title);
-        System.out.printf("%-18s : %s\n", "Description", description);
-        System.out.printf("%-18s : %s\n", "Category", category);
-        System.out.printf("%-18s : %s\n", "Priority", priority);
-        System.out.printf("%-18s : %s\n", "Status", status);
-        System.out.printf("%-18s : %d\n", "Created By", createdByUserID);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        System.out.printf("%-18s : %s\n", "Created Date", createdDate.format(formatter));
-
-        if (assignedTechnician != null) {
-            System.out.printf("%-18s : %s\n", "Technician", assignedTechnician);
-        } else {
-            System.out.printf("%-18s : %s\n", "Technician", "Unassigned");
-        }
-
-        System.out.println("-------------------------------------------------");
-
-        if (comments.isEmpty()) {
-            System.out.println("Comments: None");
-        } else {
-            System.out.println("Comments:");
-            for (Comment c : comments) {
-                System.out.println(c.getTitle() + " - " + c.getDescription() + " - " +c.getCreatedByUser() + " - " + c.getCreatedDate().format(formatter));
-            }
-        }
-
-        System.out.println("=================================================");
-    }
 }

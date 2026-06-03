@@ -1,116 +1,81 @@
 package service;
 
-import database.UserDatabase;
+import dao.UserDAO;
 import model.*;
 
 import java.util.List;
 
 public class UserManagementService {
 
-    private UserDatabase database;
-    
-    public UserManagementService(UserDatabase userdatabase) {
-    	this.database = userdatabase;
+    private final UserDAO userDAO;
+
+    public UserManagementService(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
     public List<User> getAllUsers() {
-        return database.fetchUsers();
+        return userDAO.fetchUsers();
     }
 
-    public void createUser(String name, String username,String password, String roleChoice, String email) {
+    public void createUser(String name, String username,
+                           String password, String role,
+                           String email) {
 
-        int newID = generateNextID();
-
-        database.saveUser(newID ,name, username, password, roleChoice, email);
+        userDAO.saveUser(name, username, password, role, email);
     }
-    
+
     public boolean removeUser(int userID) {
 
-        if (userID <= 0) {
-            System.out.println("Invalid user ID.");
-            return false;
-        }
+        if (userID <= 0) return false;
 
-        boolean removed = database.removeUser(userID);
-
-        if (!removed) {
-            System.out.println("User not found.");
-            return false;
-        }
-
+        userDAO.deleteUser(userID);
         return true;
     }
+
+    public void updateUserField(int userID, String field, String value) {
+
+        User user = userDAO.getUserByID(userID);
+        if (user == null) return;
+
+        switch (field) {
+
+            case "username" -> user.setUsername(value);
+            case "email" -> user.setEmail(value);
+            case "name" -> user.setName(value);
+            case "role" -> user.setRole(value);
+        }
+
+        userDAO.updateUser(user);
+    }
+
+    public void updateUserRole(int userID, String role) {
+
+        User user = userDAO.getUserByID(userID);
+        if (user == null) return;
+
+        User updated = switch (role) {
+
+            case "EMPLOYEE" -> new Employee(userID, user.getUsername(), user.getName(), user.getEmail());
+            case "TECHNICIAN" -> new Technician(userID, user.getUsername(), user.getName(), user.getEmail());
+            case "ADMINISTRATOR" -> new Admin(userID, user.getUsername(), user.getName(), user.getEmail());
+            default -> null;
+        };
+
+        if (updated != null) {
+            userDAO.updateUser(updated);
+        }
+    }
     
-    public void updateUserField(int userID, String field, String newValue) {
-        database.updateUserField(userID, field, newValue);
-    }
+    public User authenticate(String username, String password) {
 
-    public void updateUserRole(int userID, String roleChoice) {
-
-        List<User> users = database.fetchUsers();
-
-        for (User user : users) {
-
-            if (user.getUserID() == userID) {
-
-                User newUser;
-
-                switch (roleChoice) {
-
-                    case "1":
-                        newUser = new Employee(
-                                user.getUserID(),
-                                user.getUsername(),
-                                user.getName(),
-                                user.getEmail()
-                        );
-                        break;
-
-                    case "2":
-                        newUser = new Technician(
-                                user.getUserID(),
-                                user.getUsername(),
-                                user.getName(),
-                                user.getEmail()
-                        );
-                        break;
-
-                    case "3":
-                        newUser = new Admin(
-                                user.getUserID(),
-                                user.getUsername(),
-                                user.getName(),
-                                user.getEmail()
-                        );
-                        break;
-
-                    default:
-                        System.out.println("Invalid role");
-                        return;
-                }
-
-                database.updateUser(newUser);
-
-                return;
-            }
+        if (username == null || username.isBlank()) {
+            return null;
         }
 
-        System.out.println("User not found.");
-    }
-
-    private int generateNextID() {
-
-        List<User> users = database.fetchUsers();
-
-        int max = 0;
-
-        for (User user : users) {
-
-            if (user.getUserID() > max) {
-                max = user.getUserID();
-            }
+        if (password == null || password.isBlank()) {
+            return null;
         }
 
-        return max + 1;
+        return userDAO.authenticate(username, password);
     }
 }

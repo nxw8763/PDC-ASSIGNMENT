@@ -1,10 +1,9 @@
 package gui.employee;
 
+import gui.abstracts.AbstractDashboardPanel;
 import model.Employee;
 import service.CategoryService;
 import service.TicketManagementService;
-import database.UserDatabase;
-import gui.abstracts.AbstractDashboardPanel;
 
 public class EmployeeDashboardPanel extends AbstractDashboardPanel {
 
@@ -15,36 +14,32 @@ public class EmployeeDashboardPanel extends AbstractDashboardPanel {
     public static final String MY_TICKETS = "MY_TICKETS";
     public static final String CREATE_TICKET = "CREATE_TICKET";
 
-    public EmployeeDashboardPanel(Employee employee,
-            UserDatabase userDatabase) {
+    public EmployeeDashboardPanel(
+            Employee employee,
+            TicketManagementService ticketService,
+            CategoryService categoryService
+    ) {
+        super(employee);
 
-	super(employee);
-	
-	this.employee = employee;
-	this.ticketService =
-	new TicketManagementService(userDatabase);
-	this.categoryService =
-	new CategoryService();
-	
-	buildPages();
-	buildNavigation();
-}
+        this.employee = employee;
+        this.ticketService = ticketService;
+        this.categoryService = categoryService;
+
+        buildPages();
+        buildNavigation();
+    }
 
     @Override
     protected void buildPages() {
 
         registerPage(
                 MY_TICKETS,
-                new MyTicketsPanel(this.employee, this.ticketService)
+                new MyTicketsPanel(employee, ticketService)
         );
 
         registerPage(
                 CREATE_TICKET,
-                new CreateTicketPanel(
-                        this.employee,
-                        this.ticketService,
-                        this.categoryService
-                )
+                new CreateTicketPanel(employee, ticketService, categoryService)
         );
     }
 
@@ -52,7 +47,6 @@ public class EmployeeDashboardPanel extends AbstractDashboardPanel {
     protected void buildNavigation() {
 
         createNavButton("My Tickets", MY_TICKETS);
-
         createNavButton("Create Ticket", CREATE_TICKET);
     }
 }

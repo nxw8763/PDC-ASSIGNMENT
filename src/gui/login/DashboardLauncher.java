@@ -1,65 +1,65 @@
 package gui.login;
 
-import javax.swing.JFrame;
-
-import database.UserDatabase;
 import gui.abstracts.AbstractDashboardPanel;
 import gui.employee.EmployeeDashboardPanel;
 import gui.technician.TechnicianDashboardPanel;
 import gui.admin.AdminDashboardPanel;
-import model.Employee;
-import model.Technician;
-import model.User;
-import service.CategoryService;
-import service.TicketManagementService;
+
+import model.*;
+
 import service.UserManagementService;
+import service.TicketManagementService;
+import service.CategoryService;
+
+import javax.swing.*;
+
+import dao.CategoryDAO;
+import dao.TicketDAO;
 
 public class DashboardLauncher {
 
     public static void launchDashboard(
             JFrame frame,
             User user,
-            UserDatabase userDb) {
+            UserManagementService userService
+    ) {
 
         AbstractDashboardPanel dashboard;
 
-        if (user instanceof Employee) {
+
+        
+        if (user instanceof Employee emp) {
 
             dashboard = new EmployeeDashboardPanel(
-                    (Employee) user,
-                    userDb
+                    emp,
+                    new TicketManagementService(new TicketDAO()),
+                    new CategoryService(new CategoryDAO())
             );
 
-        } else if (user instanceof Technician) {
+        } else if (user instanceof Technician tech) {
 
             dashboard = new TechnicianDashboardPanel(
-                    (Technician) user,
-                    userDb
+                    tech,
+                    new TicketManagementService(new TicketDAO())
             );
 
         } else {
 
-            UserManagementService userService =
-                    new UserManagementService(userDb);
-
-            TicketManagementService ticketService =
-                    new TicketManagementService(userDb);
-
-            CategoryService categoryService =
-                    new CategoryService();
-
             dashboard = new AdminDashboardPanel(
                     user,
                     userService,
-                    ticketService,
-                    categoryService
+                    new TicketManagementService(new TicketDAO()),
+                    new CategoryService(new CategoryDAO())
             );
         }
 
         dashboard.setLogoutAction(() -> {
 
             frame.setContentPane(
-                    new LoginPanel(frame)
+                    new LoginPanel(
+                            frame,
+                            userService
+                    )
             );
 
             frame.revalidate();
@@ -67,7 +67,6 @@ public class DashboardLauncher {
         });
 
         frame.setContentPane(dashboard);
-
         frame.revalidate();
         frame.repaint();
     }

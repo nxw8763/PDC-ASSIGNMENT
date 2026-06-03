@@ -17,9 +17,8 @@ public class MyTicketsPanel extends JPanel {
     private JPanel cardsPanel;
     private JComboBox<String> sortBox;
 
-    public MyTicketsPanel(
-            Employee employee,
-            TicketManagementService ticketService) {
+    public MyTicketsPanel(Employee employee,
+                          TicketManagementService ticketService) {
 
         this.employee = employee;
         this.ticketService = ticketService;
@@ -29,69 +28,43 @@ public class MyTicketsPanel extends JPanel {
 
     private void initialise() {
 
-        setLayout(new BorderLayout(15,15));
+        setLayout(new BorderLayout(15, 15));
 
-        JPanel topPanel =
-                new JPanel(new BorderLayout());
+        JPanel topPanel = new JPanel(new BorderLayout());
 
-        JLabel title =
-                new JLabel("My Tickets");
-
-        title.setFont(
-                title.getFont()
-                        .deriveFont(Font.BOLD, 24f)
-        );
+        JLabel title = new JLabel("My Tickets");
+        title.setFont(title.getFont().deriveFont(Font.BOLD, 24f));
 
         topPanel.add(title, BorderLayout.WEST);
 
-        sortBox = new JComboBox<>(
-                new String[]{
-                        "Newest First",
-                        "Oldest First",
-                        "Priority",
-                        "Status",
-                        "Category"
-                }
-        );
+        sortBox = new JComboBox<>(new String[]{
+                "Newest First",
+                "Oldest First",
+                "Priority",
+                "Status",
+                "Category"
+        });
 
         topPanel.add(sortBox, BorderLayout.EAST);
 
         add(topPanel, BorderLayout.NORTH);
 
-        cardsPanel = new JPanel();
+        cardsPanel = new JPanel(new GridLayout(0, 3, 15, 15));
 
-        cardsPanel.setLayout(
-        	    new GridLayout(
-        	        0,     // unlimited rows
-        	        3,     // 3 cards per row
-        	        15,
-        	        15
-        	    )
-        	);
-
-        JScrollPane scrollPane =
-                new JScrollPane(cardsPanel);
-
-        scrollPane.getVerticalScrollBar()
-                .setUnitIncrement(16);
+        JScrollPane scrollPane = new JScrollPane(cardsPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         add(scrollPane, BorderLayout.CENTER);
 
-        sortBox.addActionListener(
-                e -> loadTickets()
-        );
+        sortBox.addActionListener(e -> loadTickets());
 
         loadTickets();
     }
-    
+
     @Override
     public void setVisible(boolean visible) {
-
         super.setVisible(visible);
-
-        if (visible) {
-            loadTickets();
-        }
+        if (visible) loadTickets();
     }
 
     private void loadTickets() {
@@ -99,21 +72,15 @@ public class MyTicketsPanel extends JPanel {
         cardsPanel.removeAll();
 
         List<Ticket> tickets =
-                ticketService.getOpenTicketsByUser(
-                        employee.getUserID()
-                );
+                ticketService.getOpenTicketsByUser(employee.getUserID());
 
         applySorting(tickets);
 
-        for (Ticket ticket : tickets) {
+        for (Ticket t : tickets) {
 
-            TicketCard card =
-                    new TicketCard(
-                            ticket,
-                            () -> openTicket(ticket)
-                    );
-
-            cardsPanel.add(card);
+            cardsPanel.add(
+                    new TicketCard(t, () -> openTicket(t))
+            );
         }
 
         cardsPanel.revalidate();
@@ -122,54 +89,35 @@ public class MyTicketsPanel extends JPanel {
 
     private void applySorting(List<Ticket> tickets) {
 
-        String sort =
-                (String) sortBox.getSelectedItem();
+        String sort = (String) sortBox.getSelectedItem();
 
         switch (sort) {
 
             case "Newest First" ->
-                    tickets.sort(
-                            Comparator.comparing(
-                                    Ticket::getCreatedDate
-                            ).reversed()
-                    );
+                    tickets.sort(Comparator.comparing(Ticket::getCreatedDate).reversed());
 
             case "Oldest First" ->
-                    tickets.sort(
-                            Comparator.comparing(
-                                    Ticket::getCreatedDate
-                            )
-                    );
+                    tickets.sort(Comparator.comparing(Ticket::getCreatedDate));
 
             case "Priority" ->
-	            tickets.sort(
-	                    (a,b) ->
-	                            Integer.compare(
-	                                    b.getPriority().ordinal(),
-	                                    a.getPriority().ordinal()
-	                            )
-	            );
+                    tickets.sort((a, b) ->
+                            Integer.compare(
+                                    b.getPriority().ordinal(),
+                                    a.getPriority().ordinal()
+                            )
+                    );
 
             case "Status" ->
-                    tickets.sort(
-                            Comparator.comparing(
-                                    Ticket::getStatus
-                            )
-                    );
+                    tickets.sort(Comparator.comparing(Ticket::getStatus));
 
             case "Category" ->
-                    tickets.sort(
-                            Comparator.comparing(
-                                    Ticket::getCategory
-                            )
-                    );
+                    tickets.sort(Comparator.comparing(Ticket::getCategory));
         }
     }
 
     private void openTicket(Ticket ticket) {
 
-        Window window =
-                SwingUtilities.getWindowAncestor(this);
+        Window window = SwingUtilities.getWindowAncestor(this);
 
         EmployeeTicketDetailsDialog dialog =
                 new EmployeeTicketDetailsDialog(
@@ -180,7 +128,6 @@ public class MyTicketsPanel extends JPanel {
                 );
 
         dialog.setVisible(true);
-
         loadTickets();
     }
 }

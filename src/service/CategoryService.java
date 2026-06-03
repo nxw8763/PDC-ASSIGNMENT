@@ -1,64 +1,25 @@
 package service;
 
-import java.io.*;
-import java.util.*;
+import dao.CategoryDAO;
+import java.util.List;
 
 public class CategoryService {
 
-    private static final String FILE = "data/categories.txt";
+    private final CategoryDAO categoryDAO;
 
-    // READ categories
+    public CategoryService(CategoryDAO categoryDAO) {
+        this.categoryDAO = categoryDAO;
+    }
+
     public List<String> getCategories() {
-
-        List<String> categories = new ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE))) {
-
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    categories.add(line.trim());
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return categories;
+        return categoryDAO.getCategories();
     }
 
-    // ADD category
     public void addCategory(String category) {
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE, true))) {
-
-            writer.write(category);
-            writer.newLine();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        categoryDAO.addCategory(category);
     }
 
-    // DELETE category
     public void deleteCategory(String category) {
-
-        List<String> categories = getCategories();
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE))) {
-
-            for (String c : categories) {
-
-                if (!c.equalsIgnoreCase(category)) {
-                    writer.write(c);
-                    writer.newLine();
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        categoryDAO.deleteCategory(category);
     }
 }

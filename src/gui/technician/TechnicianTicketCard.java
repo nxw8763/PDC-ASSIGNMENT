@@ -11,87 +11,41 @@ import java.awt.event.MouseListener;
 public class TechnicianTicketCard extends JPanel {
 
     private final Ticket ticket;
+    private final String assignedTechnicianLabel;
 
     public TechnicianTicketCard(
-            Ticket ticket
+            Ticket ticket,
+            String assignedTechnicianLabel
     ) {
-
         this.ticket = ticket;
+        this.assignedTechnicianLabel = assignedTechnicianLabel;
 
         initialise();
     }
 
     private void initialise() {
 
-        setLayout(
-                new BoxLayout(
-                        this,
-                        BoxLayout.Y_AXIS
-                )
-        );
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Color.LIGHT_GRAY
-                        ),
-                        new EmptyBorder(
-                                10,
-                                10,
-                                10,
-                                10
-                        )
+                        BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                        new EmptyBorder(10, 10, 10, 10)
                 )
         );
 
-        setCursor(
-                Cursor.getPredefinedCursor(
-                        Cursor.HAND_CURSOR
-                )
-        );
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        setMaximumSize(
-                new Dimension(
-                        Integer.MAX_VALUE,
-                        130
-                )
-        );
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
 
-        JLabel titleLabel =
-                new JLabel(
-                        ticket.getTitle()
-                );
+        JLabel titleLabel = new JLabel(ticket.getTitle());
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
 
-        titleLabel.setFont(
-                titleLabel.getFont()
-                        .deriveFont(Font.BOLD)
-        );
+        JLabel idLabel = new JLabel("Ticket #" + ticket.getTicketID());
+        JLabel priorityLabel = new JLabel("Priority: " + ticket.getPriority());
+        JLabel categoryLabel = new JLabel("Category: " + ticket.getCategory());
 
-        JLabel idLabel =
-                new JLabel(
-                        "Ticket #" +
-                                ticket.getTicketID()
-                );
-
-        JLabel priorityLabel =
-                new JLabel(
-                        "Priority: " +
-                                ticket.getPriority()
-                );
-
-        JLabel categoryLabel =
-                new JLabel(
-                        "Category: " +
-                                ticket.getCategory()
-                );
-
-        JLabel technicianLabel =
-                new JLabel(
-                        ticket.getAssignedTechnician()
-                                .isBlank()
-                                ? "Unassigned"
-                                : ticket.getAssignedTechnician()
-                );
+        JLabel technicianLabel = new JLabel(assignedTechnicianLabel);
 
         add(titleLabel);
         add(Box.createVerticalStrut(5));
@@ -101,34 +55,23 @@ public class TechnicianTicketCard extends JPanel {
         add(technicianLabel);
     }
 
-    public void addCardClickListener(
-            Runnable action
-    ) {
+    public void addCardClickListener(Runnable action) {
 
-        MouseListener listener =
-                new MouseAdapter() {
-
-                    @Override
-                    public void mouseClicked(
-                            java.awt.event.MouseEvent e
-                    ) {
-
-                        action.run();
-                    }
-                };
+        MouseListener listener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                action.run();
+            }
+        };
 
         addMouseListener(listener);
 
-        for (Component component : getComponents()) {
-
-            component.addMouseListener(
-                    listener
-            );
+        for (Component c : getComponents()) {
+            c.addMouseListener(listener);
         }
     }
 
     public Ticket getTicket() {
-
         return ticket;
     }
 }

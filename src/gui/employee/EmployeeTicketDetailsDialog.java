@@ -54,38 +54,17 @@ public class EmployeeTicketDetailsDialog
 
     private void addComment() {
 
-        String title =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Comment Title"
-                );
+        String title = JOptionPane.showInputDialog(this, "Comment Title");
+        if (title == null || title.isBlank()) return;
 
-        if (title == null || title.isBlank()) {
-            return;
-        }
+        String description = JOptionPane.showInputDialog(this, "Comment Description");
+        if (description == null || description.isBlank()) return;
 
-        String description =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Comment Description"
-                );
-
-        if (description == null
-                || description.isBlank()) {
-            return;
-        }
-
-        Comment comment =
-                new Comment(
-                        title,
-                        description,
-                        employee.getEmail(),
-                        LocalDateTime.now()
-                );
-
-        ticketService.commentTicket(
-                ticket,
-                comment
+        ticketService.addComment(
+                ticket.getTicketID(),
+                title,
+                description,
+                employee.getEmail()
         );
 
         loadComments();
