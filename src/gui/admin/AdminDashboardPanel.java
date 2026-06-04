@@ -1,7 +1,14 @@
 package gui.admin;
 
+import java.awt.Window;
+
+import javax.swing.SwingUtilities;
+
 import gui.abstracts.AbstractDashboardPanel;
+import gui.admin.users.UserManagementPanel;
+import gui.tickets.TicketBoardPanel;
 import model.Admin;
+import model.Ticket;
 import service.CategoryService;
 import service.TicketManagementService;
 import service.UserManagementService;
@@ -38,30 +45,30 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
 
         registerPage(
                 "overview",
-                new AdminOverviewPanel(ticketService)
+                new AdminOverviewPanel(admin, ticketService)
         );
 
         registerPage(
-                "users",
-                new AdminUsersPanel(userService)
-        );
+        	    "users",
+        	    new UserManagementPanel(admin, userService)
+    	);
 
         registerPage(
                 "tickets",
-                new AdminTicketsPanel(
+                new TicketBoardPanel(
                         admin,
                         ticketService
-                )
+        )
         );
 
         registerPage(
                 "categories",
-                new AdminCategoriesPanel(categoryService)
+                new AdminCategoriesPanel(admin, categoryService)
         );
 
         registerPage(
                 "reports",
-                new AdminReportsPanel(ticketService)
+                new AdminReportsPanel(admin, ticketService)
         );
 
         cardLayout.show(contentPanel, "overview");

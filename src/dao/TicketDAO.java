@@ -4,43 +4,92 @@ import database.DatabaseConnection;
 import model.*;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TicketDAO {
 
-    public List<Ticket> fetchTickets() {
+    public List<Ticket> fetchAllTickets() {
 
         List<Ticket> tickets = new ArrayList<>();
 
-        String sql = "SELECT * FROM TICKETS";
+        String sql = """
+                SELECT t.*, u.EMAIL AS TECH_EMAIL
+                FROM TICKETS t
+                LEFT JOIN USERS u
+                    ON t.ASSIGNED_TECHNICIAN_ID = u.USER_ID
+                """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
+                tickets.add(mapTicket(conn, rs));
+            }
 
-                int id = rs.getInt("TICKET_ID");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-                Ticket t = new Ticket(
-                        id,
-                        rs.getString("TITLE"),
-                        rs.getString("DESCRIPTION"),
-                        rs.getString("CATEGORY"),
-                        Priority.valueOf(rs.getString("PRIORITY")),
-                        rs.getInt("CREATED_BY_USER_ID"),
-                        Status.valueOf(rs.getString("STATUS")),
-                        rs.getTimestamp("CREATED_DATE").toLocalDateTime()
-                );
+        return tickets;
+    }
 
-                int techId = rs.getInt("ASSIGNED_TECHNICIAN_ID");
-                t.setAssignedTechnicianID(techId);
+    public List<Ticket> fetchOpenOrAssignedTickets(int technicianID) {
 
-                t.setComments(fetchComments(conn, id));
+        List<Ticket> tickets = new ArrayList<>();
 
-                tickets.add(t);
+        String sql = """
+                SELECT t.*, u.EMAIL AS TECH_EMAIL
+                FROM TICKETS t
+                LEFT JOIN USERS u
+                    ON t.ASSIGNED_TECHNICIAN_ID = u.USER_ID
+                WHERE t.STATUS = ?
+                   OR t.ASSIGNED_TECHNICIAN_ID = ?
+                """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, Status.OPEN.name());
+            stmt.setInt(2, technicianID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    tickets.add(mapTicket(conn, rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tickets;
+    }
+
+    public List<Ticket> fetchTicketsCreatedBy(int userID) {
+
+        List<Ticket> tickets = new ArrayList<>();
+
+        String sql = """
+                SELECT t.*, u.EMAIL AS TECH_EMAIL
+                FROM TICKETS t
+                LEFT JOIN USERS u
+                    ON t.ASSIGNED_TECHNICIAN_ID = u.USER_ID
+                WHERE t.CREATED_BY_USER_ID = ?
+                """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    tickets.add(mapTicket(conn, rs));
+                }
             }
 
         } catch (SQLException e) {
@@ -52,32 +101,24 @@ public class TicketDAO {
 
     public Ticket getTicketByID(int ticketID) {
 
-        String sql = "SELECT * FROM TICKETS WHERE TICKET_ID = ?";
+        String sql = """
+                SELECT t.*, u.EMAIL AS TECH_EMAIL
+                FROM TICKETS t
+                LEFT JOIN USERS u
+                    ON t.ASSIGNED_TECHNICIAN_ID = u.USER_ID
+                WHERE t.TICKET_ID = ?
+                """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, ticketID);
 
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
 
-            if (rs.next()) {
-
-                Ticket t = new Ticket(
-                        ticketID,
-                        rs.getString("TITLE"),
-                        rs.getString("DESCRIPTION"),
-                        rs.getString("CATEGORY"),
-                        Priority.valueOf(rs.getString("PRIORITY")),
-                        rs.getInt("CREATED_BY_USER_ID"),
-                        Status.valueOf(rs.getString("STATUS")),
-                        rs.getTimestamp("CREATED_DATE").toLocalDateTime()
-                );
-
-                t.setAssignedTechnicianID(rs.getInt("ASSIGNED_TECHNICIAN_ID"));
-                t.setComments(fetchComments(conn, ticketID));
-
-                return t;
+                if (rs.next()) {
+                    return mapTicket(conn, rs);
+                }
             }
 
         } catch (SQLException e) {
@@ -90,14 +131,16 @@ public class TicketDAO {
     public int saveTicket(Ticket t) {
 
         String sql = """
-            INSERT INTO TICKETS
-            (TITLE, DESCRIPTION, CATEGORY, PRIORITY, STATUS,
-             ASSIGNED_TECHNICIAN_ID, CREATED_BY_USER_ID, CREATED_DATE)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+                INSERT INTO TICKETS
+                (TITLE, DESCRIPTION, CATEGORY, PRIORITY, STATUS,
+                 ASSIGNED_TECHNICIAN_ID, CREATED_BY_USER_ID, CREATED_DATE)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(
+                     sql,
+                     Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, t.getTitle());
             stmt.setString(2, t.getDescription());
@@ -110,16 +153,18 @@ public class TicketDAO {
 
             stmt.executeUpdate();
 
-            ResultSet keys = stmt.getGeneratedKeys();
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
 
-            if (keys.next()) {
-                int id = keys.getInt(1);
+                if (keys.next()) {
 
-                for (Comment c : t.getComments()) {
-                    saveComment(conn, id, c);
+                    int ticketID = keys.getInt(1);
+
+                    for (Comment c : t.getComments()) {
+                        saveComment(conn, ticketID, c);
+                    }
+
+                    return ticketID;
                 }
-
-                return id;
             }
 
         } catch (SQLException e) {
@@ -132,11 +177,15 @@ public class TicketDAO {
     public void updateTicket(Ticket t) {
 
         String sql = """
-            UPDATE TICKETS
-            SET TITLE=?, DESCRIPTION=?, CATEGORY=?, PRIORITY=?,
-                STATUS=?, ASSIGNED_TECHNICIAN_ID=?
-            WHERE TICKET_ID=?
-        """;
+                UPDATE TICKETS
+                SET TITLE=?,
+                    DESCRIPTION=?,
+                    CATEGORY=?,
+                    PRIORITY=?,
+                    STATUS=?,
+                    ASSIGNED_TECHNICIAN_ID=?
+                WHERE TICKET_ID=?
+                """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -165,39 +214,87 @@ public class TicketDAO {
         }
     }
 
-    private List<Comment> fetchComments(Connection conn, int ticketID) throws SQLException {
+    // =========================
+    // MAPPING
+    // =========================
+    private Ticket mapTicket(Connection conn, ResultSet rs)
+            throws SQLException {
+
+        int ticketID = rs.getInt("TICKET_ID");
+
+        Ticket ticket = new Ticket(
+                ticketID,
+                rs.getString("TITLE"),
+                rs.getString("DESCRIPTION"),
+                rs.getString("CATEGORY"),
+                Priority.valueOf(rs.getString("PRIORITY")),
+                rs.getInt("CREATED_BY_USER_ID"),
+                Status.valueOf(rs.getString("STATUS")),
+                rs.getTimestamp("CREATED_DATE").toLocalDateTime()
+        );
+
+        ticket.setAssignedTechnicianID(
+                rs.getInt("ASSIGNED_TECHNICIAN_ID")
+        );
+
+        ticket.setAssignedTechnicianEmail(
+                rs.getString("TECH_EMAIL")
+        );
+
+        ticket.setComments(
+                fetchComments(conn, ticketID)
+        );
+
+        return ticket;
+    }
+
+    // =========================
+    // COMMENTS
+    // =========================
+    private List<Comment> fetchComments(
+            Connection conn,
+            int ticketID) throws SQLException {
 
         List<Comment> comments = new ArrayList<>();
 
-        String sql = "SELECT * FROM COMMENTS WHERE TICKET_ID=?";
+        String sql = """
+                SELECT *
+                FROM COMMENTS
+                WHERE TICKET_ID = ?
+                """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, ticketID);
 
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
+                while (rs.next()) {
 
-                comments.add(new Comment(
-                        rs.getString("TITLE"),
-                        rs.getString("DESCRIPTION"),
-                        rs.getString("CREATED_BY"),
-                        rs.getTimestamp("CREATED_DATE").toLocalDateTime()
-                ));
+                    comments.add(new Comment(
+                            rs.getString("TITLE"),
+                            rs.getString("DESCRIPTION"),
+                            rs.getString("CREATED_BY"),
+                            rs.getTimestamp("CREATED_DATE")
+                                    .toLocalDateTime()
+                    ));
+                }
             }
         }
 
         return comments;
     }
 
-    private void saveComment(Connection conn, int ticketID, Comment c) throws SQLException {
+    private void saveComment(
+            Connection conn,
+            int ticketID,
+            Comment c) throws SQLException {
 
         String sql = """
-            INSERT INTO COMMENTS
-            (TICKET_ID, TITLE, DESCRIPTION, CREATED_BY, CREATED_DATE)
-            VALUES (?, ?, ?, ?, ?)
-        """;
+                INSERT INTO COMMENTS
+                (TICKET_ID, TITLE, DESCRIPTION, CREATED_BY, CREATED_DATE)
+                VALUES (?, ?, ?, ?, ?)
+                """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -205,7 +302,10 @@ public class TicketDAO {
             stmt.setString(2, c.getTitle());
             stmt.setString(3, c.getDescription());
             stmt.setString(4, c.getCreatedByUser());
-            stmt.setTimestamp(5, Timestamp.valueOf(c.getCreatedDate()));
+            stmt.setTimestamp(
+                    5,
+                    Timestamp.valueOf(c.getCreatedDate())
+            );
 
             stmt.executeUpdate();
         }

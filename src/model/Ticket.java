@@ -18,7 +18,8 @@ public class Ticket {
     private int createdByUserID;
 
     private int assignedTechnicianID;
-
+    private String assignedTechnicianEmail;
+    
     private List<Comment> comments;
 
     public Ticket(int ticketID, String title, String description,
@@ -45,6 +46,10 @@ public class Ticket {
 
     public void setAssignedTechnicianID(int techID) {
         this.assignedTechnicianID = techID;
+    }
+    
+    public void setAssignedTechnicianEmail(String email) {
+    	this.assignedTechnicianEmail = email; 
     }
 
     public void setStatus(Status status) {
@@ -101,6 +106,10 @@ public class Ticket {
     
     public int getAssignedTechnicianID() {
     	return this.assignedTechnicianID;
+    }
+    
+    public String getAssignedTechnicianEmail() {
+    	return this.assignedTechnicianEmail;
     }
 
 }

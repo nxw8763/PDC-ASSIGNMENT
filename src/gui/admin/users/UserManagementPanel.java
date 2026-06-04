@@ -1,5 +1,6 @@
 package gui.admin.users;
 
+import model.Admin;
 import model.User;
 import service.UserManagementService;
 
@@ -13,14 +14,17 @@ public class UserManagementPanel extends JPanel {
     private final UserTableModel tableModel =
             new UserTableModel();
 
+    private final Admin admin;
+    
     private JTable table;
 
     public UserManagementPanel(
-            UserManagementService userService
+            Admin admin, UserManagementService userService
     ) {
 
         this.userService = userService;
-
+        this.admin = admin;
+        
         initialise();
         loadUsers();
     }
@@ -82,7 +86,7 @@ public class UserManagementPanel extends JPanel {
     private void loadUsers() {
 
         tableModel.setUsers(
-                userService.getAllUsers()
+                userService.getAllUsers(admin)
         );
     }
 
@@ -102,6 +106,7 @@ public class UserManagementPanel extends JPanel {
         CreateUserDialog dialog =
                 new CreateUserDialog(
                         SwingUtilities.getWindowAncestor(this),
+                        admin,
                         userService
                 );
 
@@ -121,6 +126,7 @@ public class UserManagementPanel extends JPanel {
         EditUserDialog dialog =
                 new EditUserDialog(
                         SwingUtilities.getWindowAncestor(this),
+                        admin,
                         user,
                         userService
                 );
@@ -151,6 +157,7 @@ public class UserManagementPanel extends JPanel {
         }
 
         userService.removeUser(
+        		admin,
                 user.getUserID()
         );
 

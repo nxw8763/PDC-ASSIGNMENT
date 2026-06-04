@@ -3,6 +3,9 @@ package gui.admin;
 import service.CategoryService;
 
 import javax.swing.*;
+
+import model.Admin;
+
 import java.awt.*;
 
 public class AdminCategoriesPanel extends JPanel {
@@ -11,9 +14,12 @@ public class AdminCategoriesPanel extends JPanel {
     private final DefaultListModel<String> model = new DefaultListModel<>();
     private final JList<String> list = new JList<>(model);
 
-    public AdminCategoriesPanel(CategoryService service) {
+    private final Admin admin;
+    
+    public AdminCategoriesPanel(Admin admin, CategoryService service) {
 
         this.service = service;
+        this.admin = admin;
 
         setLayout(new BorderLayout());
 
@@ -46,7 +52,7 @@ public class AdminCategoriesPanel extends JPanel {
         String c = JOptionPane.showInputDialog(this, "Category");
         if (c == null) return;
 
-        service.addCategory(c);
+        service.addCategory(admin, c);
         load();
     }
 
@@ -55,7 +61,7 @@ public class AdminCategoriesPanel extends JPanel {
         String selected = list.getSelectedValue();
         if (selected == null) return;
 
-        service.deleteCategory(selected);
+        service.deleteCategory(admin, selected);
         load();
     }
 }

@@ -1,56 +1,60 @@
 package gui.admin;
 
+import gui.abstracts.AbstractTicketDetailsDialog;
+
 import model.Admin;
+import model.Priority;
 import model.Status;
 import model.Ticket;
+
 import service.TicketManagementService;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class AdminTicketDetailsDialog extends JDialog {
+public class AdminTicketDetailsDialog
+        extends AbstractTicketDetailsDialog {
 
-    private final Ticket ticket;
     private final Admin admin;
-    private final TicketManagementService service;
-
-    private JTextArea area;
+    private final TicketManagementService ticketService;
 
     public AdminTicketDetailsDialog(
             Window owner,
             Ticket ticket,
             Admin admin,
-            TicketManagementService service
+            TicketManagementService ticketService
     ) {
 
-        super(
-                owner,
-                "Ticket Details",
-                ModalityType.APPLICATION_MODAL
-        );
+        super(owner, ticket);
 
-        this.ticket = ticket;
         this.admin = admin;
-        this.service = service;
-
-        initialise();
+        this.ticketService = ticketService;
     }
 
-    private void initialise() {
+    @Override
+    protected JPanel createActionPanel() {
 
-        setLayout(new BorderLayout());
-
-        area = new JTextArea();
-        area.setEditable(false);
-
-        refreshText();
-
-        JPanel buttons =
+        JPanel panel =
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT
                         )
                 );
+
+        JButton assignButton =
+                new JButton("Assign");
+
+        JButton unassignButton =
+                new JButton("Unassign");
+
+        JButton statusButton =
+                new JButton("Change Status");
+
+        JButton priorityButton =
+                new JButton("Change Priority");
+
+        JButton commentButton =
+                new JButton("Add Comment");
 
         JButton closeButton =
                 new JButton("Close Ticket");
@@ -58,8 +62,33 @@ public class AdminTicketDetailsDialog extends JDialog {
         JButton reopenButton =
                 new JButton("Reopen");
 
-        buttons.add(closeButton);
-        buttons.add(reopenButton);
+        panel.add(assignButton);
+        panel.add(unassignButton);
+        panel.add(statusButton);
+        panel.add(priorityButton);
+        panel.add(commentButton);
+        panel.add(closeButton);
+        panel.add(reopenButton);
+
+        assignButton.addActionListener(
+                e -> assignTicket()
+        );
+
+        unassignButton.addActionListener(
+                e -> unassignTicket()
+        );
+
+        statusButton.addActionListener(
+                e -> changeStatus()
+        );
+
+        priorityButton.addActionListener(
+                e -> changePriority()
+        );
+
+        commentButton.addActionListener(
+                e -> addComment()
+        );
 
         closeButton.addActionListener(
                 e -> closeTicket()
@@ -69,57 +98,161 @@ public class AdminTicketDetailsDialog extends JDialog {
                 e -> reopenTicket()
         );
 
-        add(
-                new JScrollPane(area),
-                BorderLayout.CENTER
-        );
-
-        add(
-                buttons,
-                BorderLayout.SOUTH
-        );
-
-        setSize(500, 350);
-        setLocationRelativeTo(getOwner());
+        return panel;
     }
 
-    private void refreshText() {
+    private void assignTicket() {
 
-        area.setText(
-                "Ticket ID: " + ticket.getTicketID() + "\n\n" +
-                "Title: " + ticket.getTitle() + "\n" +
-                "Category: " + ticket.getCategory() + "\n" +
-                "Priority: " + ticket.getPriority() + "\n" +
-                "Status: " + ticket.getStatus() + "\n"
-        );
+        String technicianIdString =
+                JOptionPane.showInputDialog(
+                        this,
+                        "Technician ID"
+                );
+
+        if (technicianIdString == null
+                || technicianIdString.isBlank()) {
+            return;
+        }
+
+        try {
+
+            int technicianId =
+                    Integer.parseInt(
+                            technicianIdString
+                    );
+
+            ticketService.assignTicket(
+                    ticket.getTicketID(),
+                    technicianId,
+                    null,
+                    admin
+            );
+
+            loadTicket();
+
+        } catch (NumberFormatException ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Invalid Technician ID"
+            );
+        }
     }
 
-    private void closeTicket() {
+    private void unassignTicket() {
 
-        service.closeTicket(
+        ticketService.unassignTicket(
                 ticket.getTicketID(),
                 admin
         );
 
-        ticket.setStatus(
-                Status.CLOSED
+        loadTicket();
+    }
+
+    private void changeStatus() {
+
+        Status status =
+                (Status) JOptionPane.showInputDialog(
+                        this,
+                        "Select Status",
+                        "Status",
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        Status.values(),
+                        ticket.getStatus()
+                );
+
+        if (status == null) {
+            return;
+        }
+
+        ticketService.updateStatus(
+                ticket.getTicketID(),
+                status,
+                admin
         );
 
-        refreshText();
+        loadTicket();
+    }
+
+    private void changePriority() {
+
+        Priority priority =
+                (Priority) JOptionPane.showInputDialog(
+                        this,
+                        "Select Priority",
+                        "Priority",
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        Priority.values(),
+                        ticket.getPriority()
+                );
+
+        if (priority == null) {
+            return;
+        }
+
+        ticketService.updatePriority(
+                ticket.getTicketID(),
+                priority,
+                admin
+        );
+
+        loadTicket();
+    }
+
+    private void addComment() {
+
+        String title =
+                JOptionPane.showInputDialog(
+                        this,
+                        "Comment Title"
+                );
+
+        if (title == null
+                || title.isBlank()) {
+            return;
+        }
+
+        String description =
+                JOptionPane.showInputDialog(
+                        this,
+                        "Comment Description"
+                );
+
+        if (description == null
+                || description.isBlank()) {
+            return;
+        }
+
+        ticketService.addComment(
+                ticket.getTicketID(),
+                title,
+                description,
+                admin.getEmail()
+        );
+
+        loadComments();
+    }
+
+    private void closeTicket() {
+
+        ticketService.closeTicket(
+                ticket.getTicketID(),
+                admin
+        );
+
+        loadTicket();
     }
 
     private void reopenTicket() {
 
-        service.updateStatus(
+        ticketService.updateStatus(
                 ticket.getTicketID(),
                 Status.OPEN,
                 admin
         );
 
-        ticket.setStatus(
-                Status.OPEN
-        );
-
-        refreshText();
+        loadTicket();
     }
 }

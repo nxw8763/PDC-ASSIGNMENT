@@ -1,5 +1,6 @@
 package gui.admin.users;
 
+import model.Admin;
 import model.User;
 import service.UserManagementService;
 
@@ -16,6 +17,7 @@ public class EditUserDialog extends JDialog {
 
     public EditUserDialog(
             Window owner,
+            Admin admin,
             User user,
             UserManagementService userService
     ) {
@@ -25,10 +27,10 @@ public class EditUserDialog extends JDialog {
         this.user = user;
         this.userService = userService;
 
-        initialise();
+        initialise(admin);
     }
 
-    private void initialise() {
+    private void initialise(Admin admin) {
 
         form.getUsernameField()
                 .setText(user.getUsername());
@@ -50,7 +52,7 @@ public class EditUserDialog extends JDialog {
                 new JButton("Save");
 
         saveButton.addActionListener(
-                e -> saveChanges()
+                e -> saveChanges(admin)
         );
 
         JPanel bottom = new JPanel(
@@ -68,23 +70,26 @@ public class EditUserDialog extends JDialog {
         setLocationRelativeTo(getOwner());
     }
 
-    private void saveChanges() {
+    private void saveChanges(Admin admin) {
 
         int id = user.getUserID();
 
         userService.updateUserField(
+        		admin,
                 id,
                 "username",
                 form.getUsernameField().getText()
         );
 
         userService.updateUserField(
+        		admin,
                 id,
                 "name",
                 form.getNameField().getText()
         );
 
         userService.updateUserField(
+        		admin,
                 id,
                 "email",
                 form.getEmailField().getText()
@@ -98,6 +103,7 @@ public class EditUserDialog extends JDialog {
         if (!password.isBlank()) {
 
             userService.updateUserField(
+            		admin,
                     id,
                     "password",
                     password
@@ -117,6 +123,7 @@ public class EditUserDialog extends JDialog {
                 };
 
         userService.updateUserRole(
+        		admin,
                 id,
                 roleChoice
         );

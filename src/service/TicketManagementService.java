@@ -39,43 +39,34 @@ public class TicketManagementService {
         return t;
     }
 
+    
+    
     // =========================
     // READ
     // =========================
-    public List<Ticket> getAllTickets() {
-        return ticketDAO.fetchTickets();
+    public List<Ticket> getVisibleTickets(User user) {
+
+        if (user instanceof Admin admin) {
+            return ticketDAO.fetchAllTickets();
+        }
+
+        if (user instanceof Technician tech) {
+            return ticketDAO.fetchOpenOrAssignedTickets(tech.getUserID());
+        }
+
+        if (user instanceof Employee emp) {
+            return ticketDAO.fetchTicketsCreatedBy(emp.getUserID());
+        }
+
+        return List.of();
     }
-
-    public List<Ticket> getOpenTicketsByUser(int userID) {
-
-        return ticketDAO.fetchTickets()
-                .stream()
-                .filter(t -> t.getCreatedByUserID() == userID)
-                .filter(t -> t.getStatus() != Status.CLOSED)
-                .collect(Collectors.toList());
-    }
-
-    public List<Ticket> getTicketsByTechnician(int techID) {
-
-        return ticketDAO.fetchTickets()
-                .stream()
-                .filter(t -> t.getAssignedTechnicianID() == techID)
-                .collect(Collectors.toList());
-    }
-
-    public List<Ticket> getUnassignedTickets() {
-
-        return ticketDAO.fetchTickets()
-                .stream()
-                .filter(t -> t.getAssignedTechnicianID() == 0)
-                .filter(t -> t.getStatus() == Status.OPEN)
-                .collect(Collectors.toList());
-    }
+    
+    
 
     // =========================
     // ASSIGN / UNASSIGN
     // =========================
-    public void assignTicket(int ticketID, int techID, User actor) {
+    public void assignTicket(int ticketID, int techID, String techEmail, User actor) {
 
         Ticket t = ticketDAO.getTicketByID(ticketID);
         if (t == null) return;
@@ -83,6 +74,7 @@ public class TicketManagementService {
         if (!canModifyTicket(t, actor)) return;
 
         t.setAssignedTechnicianID(techID);
+        t.setAssignedTechnicianEmail(techEmail);
         t.setStatus(Status.ASSIGNED);
 
         ticketDAO.updateTicket(t);
@@ -96,6 +88,7 @@ public class TicketManagementService {
         if (!canModifyTicket(t, actor)) return;
 
         t.setAssignedTechnicianID(0);
+        t.setAssignedTechnicianEmail(null);
         t.setStatus(Status.OPEN);
 
         ticketDAO.updateTicket(t);

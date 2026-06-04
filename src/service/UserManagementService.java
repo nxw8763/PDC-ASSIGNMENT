@@ -13,27 +13,30 @@ public class UserManagementService {
         this.userDAO = userDAO;
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(Admin admin) {
+    	requireAdmin(admin);
         return userDAO.fetchUsers();
     }
 
-    public void createUser(String name, String username,
+    public void createUser(Admin admin, String name, String username,
                            String password, String role,
                            String email) {
 
+    	requireAdmin(admin);
         userDAO.saveUser(name, username, password, role, email);
     }
 
-    public boolean removeUser(int userID) {
+    public boolean removeUser(Admin admin, int userID) {
 
+    	requireAdmin(admin);
         if (userID <= 0) return false;
 
         userDAO.deleteUser(userID);
         return true;
     }
 
-    public void updateUserField(int userID, String field, String value) {
-
+    public void updateUserField(Admin admin, int userID, String field, String value) {
+    	requireAdmin(admin);
         User user = userDAO.getUserByID(userID);
         if (user == null) return;
 
@@ -48,8 +51,8 @@ public class UserManagementService {
         userDAO.updateUser(user);
     }
 
-    public void updateUserRole(int userID, String role) {
-
+    public void updateUserRole(Admin admin, int userID, String role) {
+    	requireAdmin(admin);
         User user = userDAO.getUserByID(userID);
         if (user == null) return;
 
@@ -77,5 +80,14 @@ public class UserManagementService {
         }
 
         return userDAO.authenticate(username, password);
+    }
+    
+    private void requireAdmin(User currentUser) {
+
+        if (!(currentUser instanceof Admin)) {
+
+            throw new SecurityException(
+                    "Only administrators may manage users.");
+        }
     }
 }

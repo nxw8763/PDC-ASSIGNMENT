@@ -3,6 +3,9 @@ package gui.admin.users;
 import service.UserManagementService;
 
 import javax.swing.*;
+
+import model.Admin;
+
 import java.awt.*;
 
 public class CreateUserDialog extends JDialog {
@@ -14,6 +17,7 @@ public class CreateUserDialog extends JDialog {
 
     public CreateUserDialog(
             Window owner,
+            Admin admin,
             UserManagementService userService
     ) {
 
@@ -21,10 +25,10 @@ public class CreateUserDialog extends JDialog {
 
         this.userService = userService;
 
-        initialise();
+        initialise(admin);
     }
 
-    private void initialise() {
+    private void initialise(Admin admin) {
 
         setLayout(new BorderLayout());
 
@@ -34,7 +38,7 @@ public class CreateUserDialog extends JDialog {
                 new JButton("Create User");
 
         createButton.addActionListener(
-                e -> createUser()
+                e -> createUser(admin)
         );
 
         JPanel bottom = new JPanel(
@@ -51,7 +55,7 @@ public class CreateUserDialog extends JDialog {
         setLocationRelativeTo(getOwner());
     }
 
-    private void createUser() {
+    private void createUser(Admin admin) {
 
         String username =
                 form.getUsernameField().getText();
@@ -70,6 +74,7 @@ public class CreateUserDialog extends JDialog {
         String role = (String) form.getRoleBox().getSelectedItem();
 
         userService.createUser(
+        		admin,
                 name,
                 username,
                 password,

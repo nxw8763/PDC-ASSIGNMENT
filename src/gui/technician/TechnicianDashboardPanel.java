@@ -1,15 +1,19 @@
 package gui.technician;
 
+import java.awt.Window;
+
+import javax.swing.SwingUtilities;
+
 import gui.abstracts.AbstractDashboardPanel;
+import gui.tickets.TicketBoardPanel;
 import model.Technician;
+import model.Ticket;
 import service.TicketManagementService;
 
 public class TechnicianDashboardPanel extends AbstractDashboardPanel {
 
     private final Technician technician;
     private final TicketManagementService ticketService;
-
-    private TechnicianKanbanPanel kanbanPanel;
 
     public TechnicianDashboardPanel(
             Technician technician,
@@ -26,16 +30,18 @@ public class TechnicianDashboardPanel extends AbstractDashboardPanel {
 
     @Override
     protected void buildPages() {
-
-        kanbanPanel =
-                new TechnicianKanbanPanel(
+       registerPage(
+                "KANBAN_BOARD",
+                new TicketBoardPanel(
                         technician,
                         ticketService
-                );
+                )
+        );
 
-        registerPage("KANBAN_BOARD", kanbanPanel);
-
-        cardLayout.show(contentPanel, "KANBAN_BOARD");
+        cardLayout.show(
+                contentPanel,
+                "KANBAN_BOARD"
+        );
     }
 
     @Override

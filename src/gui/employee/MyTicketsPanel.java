@@ -3,6 +3,7 @@ package gui.employee;
 import model.Employee;
 import model.Ticket;
 import service.TicketManagementService;
+import gui.tickets.TicketCard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,15 +73,18 @@ public class MyTicketsPanel extends JPanel {
         cardsPanel.removeAll();
 
         List<Ticket> tickets =
-                ticketService.getOpenTicketsByUser(employee.getUserID());
+                ticketService.getVisibleTickets(employee);
 
         applySorting(tickets);
 
         for (Ticket t : tickets) {
 
-            cardsPanel.add(
-                    new TicketCard(t, () -> openTicket(t))
-            );
+        	cardsPanel.add(
+        		    new TicketCard(
+        		            t,
+        		            () -> openTicket(t)
+        		    )
+        		);
         }
 
         cardsPanel.revalidate();

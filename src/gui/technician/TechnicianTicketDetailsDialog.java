@@ -24,8 +24,6 @@ public class TechnicianTicketDetailsDialog extends AbstractTicketDetailsDialog {
 
         this.technician = technician;
         this.ticketService = ticketService;
-
-        refreshButtonStates();
     }
 
     @Override
@@ -54,16 +52,12 @@ public class TechnicianTicketDetailsDialog extends AbstractTicketDetailsDialog {
         return panel;
     }
 
-    private void refreshButtonStates() {
-        // Optional future enhancement:
-        // disable buttons if not assigned to this technician
-    }
-
     private void assignTicket() {
 
         ticketService.assignTicket(
                 ticket.getTicketID(),
                 technician.getUserID(),
+                technician.getEmail(),
                 technician
         );
 
