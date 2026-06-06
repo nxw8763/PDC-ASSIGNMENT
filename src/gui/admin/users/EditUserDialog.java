@@ -102,10 +102,9 @@ public class EditUserDialog extends JDialog {
 
         if (!password.isBlank()) {
 
-            userService.updateUserField(
+            userService.updateUserPassword(
             		admin,
                     id,
-                    "password",
                     password
             );
         }
@@ -114,18 +113,11 @@ public class EditUserDialog extends JDialog {
                 (String) form.getRoleBox()
                         .getSelectedItem();
 
-        String roleChoice =
-                switch (role) {
-
-                    case "EMPLOYEE" -> "1";
-                    case "TECHNICIAN" -> "2";
-                    default -> "3";
-                };
-
-        userService.updateUserRole(
+        userService.updateUserField(
         		admin,
                 id,
-                roleChoice
+                "role",
+                role
         );
 
         dispose();

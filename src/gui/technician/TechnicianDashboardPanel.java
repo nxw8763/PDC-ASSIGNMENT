@@ -34,6 +34,7 @@ public class TechnicianDashboardPanel extends AbstractDashboardPanel {
                 "KANBAN_BOARD",
                 new TicketBoardPanel(
                         technician,
+                        null,
                         ticketService
                 )
         );

@@ -18,7 +18,8 @@ public class DatabaseInitializer {
 	        createTicketsTable(stmt);
 	        createCommentsTable(stmt);
 	        createCategoriesTable(stmt);
-
+	        createAuditLogTable(stmt);
+	        
 	        seedData(conn);
 
 	    } catch (SQLException e) {
@@ -32,7 +33,7 @@ public class DatabaseInitializer {
 	            Connection conn = DatabaseConnection.getConnection();
 	            Statement stmt = conn.createStatement()
 	    ) {
-
+	    	stmt.executeUpdate("DROP TABLE AUDIT_LOG");
 	        stmt.executeUpdate("DROP TABLE COMMENTS");
 	        stmt.executeUpdate("DROP TABLE TICKETS");
 	        stmt.executeUpdate("DROP TABLE USERS");
@@ -215,6 +216,43 @@ public class DatabaseInitializer {
             );
 
             System.out.println("CATEGORIES table created.");
+
+        } catch (SQLException ignored) {
+        }
+    }
+    
+    private static void createAuditLogTable(Statement stmt) {
+
+        try {
+
+            stmt.executeUpdate(
+                    """
+                    CREATE TABLE AUDIT_LOG (
+                    
+                        AUDIT_ID INT GENERATED ALWAYS AS IDENTITY
+                            PRIMARY KEY,
+                            
+                        USER_ID INT NOT NULL,
+                        
+                        ACTION_TYPE VARCHAR(50) NOT NULL,
+                        
+                        ENTITY_TYPE VARCHAR(50) NOT NULL,
+                        
+                        ENTITY_ID INT,
+                        
+                        DETAILS VARCHAR(500),
+                        
+                        TIMESTAMP TIMESTAMP
+                            DEFAULT CURRENT_TIMESTAMP
+                            NOT NULL,
+                        
+                        FOREIGN KEY (USER_ID)
+                            REFERENCES USERS(USER_ID)
+                    )
+                    """
+            );
+
+            System.out.println("AUDIT_LOG table created.");
 
         } catch (SQLException ignored) {
         }

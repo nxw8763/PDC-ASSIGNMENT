@@ -57,6 +57,7 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
                 "tickets",
                 new TicketBoardPanel(
                         admin,
+                        userService,
                         ticketService
         )
         );
@@ -67,8 +68,8 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
         );
 
         registerPage(
-                "reports",
-                new AdminReportsPanel(admin, ticketService)
+                "audits",
+                new AdminAuditLogPanel(admin)
         );
 
         cardLayout.show(contentPanel, "overview");
@@ -98,8 +99,8 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
         );
 
         createNavButton(
-                "Reports",
-                "reports"
+                "Audits",
+                "audits"
         );
     }
 }

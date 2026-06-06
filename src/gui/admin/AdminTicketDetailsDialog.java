@@ -3,12 +3,14 @@ package gui.admin;
 import gui.abstracts.AbstractTicketDetailsDialog;
 
 import model.Admin;
-import model.Priority;
-import model.Status;
+import model.Technician;
 import model.Ticket;
-
+import model.enums.Priority;
+import model.enums.Status;
 import service.TicketManagementService;
+import service.UserManagementService;
 
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 
@@ -16,19 +18,21 @@ public class AdminTicketDetailsDialog
         extends AbstractTicketDetailsDialog {
 
     private final Admin admin;
+    private final UserManagementService userService;
     private final TicketManagementService ticketService;
 
     public AdminTicketDetailsDialog(
             Window owner,
             Ticket ticket,
             Admin admin,
+            UserManagementService userService,
             TicketManagementService ticketService
     ) {
-
         super(owner, ticket);
 
         this.admin = admin;
         this.ticketService = ticketService;
+        this.userService = userService;
     }
 
     @Override
@@ -103,40 +107,54 @@ public class AdminTicketDetailsDialog
 
     private void assignTicket() {
 
-        String technicianIdString =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Technician ID"
-                );
+        List<Technician> technicians =
+                userService.getAllTechnicians(admin);
 
-        if (technicianIdString == null
-                || technicianIdString.isBlank()) {
-            return;
-        }
-
-        try {
-
-            int technicianId =
-                    Integer.parseInt(
-                            technicianIdString
-                    );
-
-            ticketService.assignTicket(
-                    ticket.getTicketID(),
-                    technicianId,
-                    null,
-                    admin
-            );
-
-            loadTicket();
-
-        } catch (NumberFormatException ex) {
+        if (technicians.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Invalid Technician ID"
+                    "No technicians available."
             );
+
+            return;
         }
+
+        JComboBox<Technician> technicianCombo =
+                new JComboBox<>(
+                        technicians.toArray(
+                                new Technician[0]
+                        )
+                );
+
+        int result =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        technicianCombo,
+                        "Select Technician",
+                        JOptionPane.OK_CANCEL_OPTION
+                );
+
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        Technician technician =
+                (Technician) technicianCombo
+                        .getSelectedItem();
+
+        if (technician == null) {
+            return;
+        }
+
+        ticketService.assignTicket(
+                ticket.getTicketID(),
+                technician.getUserID(),
+                technician.getEmail(),
+                admin
+        );
+
+        loadTicket();
     }
 
     private void unassignTicket() {
@@ -229,7 +247,7 @@ public class AdminTicketDetailsDialog
                 ticket.getTicketID(),
                 title,
                 description,
-                admin.getEmail()
+                admin
         );
 
         loadComments();

@@ -5,6 +5,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.enums.Priority;
+import model.enums.Status;
+
 public class Ticket {
 
     private int ticketID;

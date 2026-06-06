@@ -1,6 +1,8 @@
 package gui.technician;
 
 import model.*;
+import model.enums.Priority;
+import model.enums.Status;
 import service.TicketManagementService;
 
 import javax.swing.*;
@@ -144,7 +146,7 @@ public class TechnicianTicketDetailsDialog extends AbstractTicketDetailsDialog {
                 ticket.getTicketID(),
                 title,
                 description,
-                technician.getEmail()
+                technician
         );
 
         loadComments();

@@ -69,6 +69,7 @@ public class DashboardLauncher {
         });
 
         frame.setContentPane(dashboard);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.revalidate();
         frame.repaint();
     }

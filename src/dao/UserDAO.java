@@ -126,6 +126,27 @@ public class UserDAO {
             e.printStackTrace();
         }
     }
+    
+    public void updateUserPassword(int userID, String password) {
+
+        String sql = """
+            UPDATE USERS
+            SET PASSWORD = ?
+            WHERE USER_ID = ?
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, password);
+            stmt.setInt(2, userID);
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void deleteUser(int userID) {
 

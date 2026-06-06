@@ -15,4 +15,9 @@ public class Technician extends User {
     public void setCurrentTicket(Ticket ticket) {
         this.currentTicket = ticket;
     }
+    
+    @Override
+    public String toString() {
+        return getUserID() + " - " + getEmail();
+    }
 }

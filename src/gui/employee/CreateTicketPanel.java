@@ -1,8 +1,8 @@
 package gui.employee;
 
 import model.Employee;
-import model.Priority;
 import model.Ticket;
+import model.enums.Priority;
 import service.CategoryService;
 import service.TicketManagementService;
 

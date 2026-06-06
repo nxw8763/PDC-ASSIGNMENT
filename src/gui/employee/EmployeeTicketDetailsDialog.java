@@ -64,7 +64,7 @@ public class EmployeeTicketDetailsDialog
                 ticket.getTicketID(),
                 title,
                 description,
-                employee.getEmail()
+                employee
         );
 
         loadComments();

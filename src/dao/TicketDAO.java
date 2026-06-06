@@ -2,6 +2,8 @@ package dao;
 
 import database.DatabaseConnection;
 import model.*;
+import model.enums.Priority;
+import model.enums.Status;
 
 import java.sql.*;
 import java.util.ArrayList;

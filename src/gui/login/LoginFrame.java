@@ -16,12 +16,9 @@ public class LoginFrame extends JFrame {
         setSize(500, 350);
         setLocationRelativeTo(null);
 
-        // ===== DAO LAYER =====
-        UserDAO userDAO = new UserDAO();
-
-        // ===== SERVICE LAYER =====
+        // for authenticating user
         UserManagementService userService =
-                new UserManagementService(userDAO);
+                new UserManagementService(new UserDAO());
 
         setContentPane(
                 new LoginPanel(

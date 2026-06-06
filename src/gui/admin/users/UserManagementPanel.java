@@ -35,6 +35,8 @@ public class UserManagementPanel extends JPanel {
 
         table = new JTable(tableModel);
 
+        table.getTableHeader().setReorderingAllowed(false);
+        
         add(
                 new JScrollPane(table),
                 BorderLayout.CENTER

@@ -1,7 +1,9 @@
 package service;
 
 import dao.TicketDAO;
+
 import model.*;
+import model.enums.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,9 +17,6 @@ public class TicketManagementService {
         this.ticketDAO = ticketDAO;
     }
 
-    // =========================
-    // CREATE
-    // =========================
     public Ticket createTicket(String title, String desc,
                                String category, Priority priority,
                                User creator) {
@@ -36,115 +35,110 @@ public class TicketManagementService {
         int id = ticketDAO.saveTicket(t);
         t.setTicketID(id);
 
+        AuditService.addAuditLog(creator.getUserID(), AuditAction.CREATE, AuditEntity.TICKET, t.getTicketID(), creator.getName() + " created ticket ID:" + t.getTicketID() + " '" + title + "'");;
+        
         return t;
     }
 
-    
-    
-    // =========================
-    // READ
-    // =========================
     public List<Ticket> getVisibleTickets(User user) {
 
         if (user instanceof Admin admin) {
-            return ticketDAO.fetchAllTickets();
+        	List<Ticket> tickets = ticketDAO.fetchAllTickets();
+        	AuditService.addAuditLog(admin.getUserID(), AuditAction.FETCH, AuditEntity.TICKET, tickets.size(), admin.getName() + " fetched " + tickets.size() + " tickets");
+        	return tickets;
         }
 
         if (user instanceof Technician tech) {
-            return ticketDAO.fetchOpenOrAssignedTickets(tech.getUserID());
+        	List<Ticket> tickets = ticketDAO.fetchOpenOrAssignedTickets(tech.getUserID());
+        	AuditService.addAuditLog(tech.getUserID(), AuditAction.FETCH, AuditEntity.TICKET, tickets.size(), tech.getName() + " fetched " + tickets.size() + " tickets");
+            return tickets;
         }
 
         if (user instanceof Employee emp) {
-            return ticketDAO.fetchTicketsCreatedBy(emp.getUserID());
+            List<Ticket> tickets = ticketDAO.fetchTicketsCreatedBy(emp.getUserID());
+            AuditService.addAuditLog(emp.getUserID(), AuditAction.FETCH, AuditEntity.TICKET, tickets.size(), emp.getName() + " fetched " + tickets.size() + " tickets");
+            return tickets;
         }
 
         return List.of();
     }
     
-    
-
-    // =========================
-    // ASSIGN / UNASSIGN
-    // =========================
-    public void assignTicket(int ticketID, int techID, String techEmail, User actor) {
+    public void assignTicket(int ticketID, int techID, String techEmail, User user) {
 
         Ticket t = ticketDAO.getTicketByID(ticketID);
         if (t == null) return;
 
-        if (!canModifyTicket(t, actor)) return;
+        if (!canModifyTicket(t, user)) return;
 
         t.setAssignedTechnicianID(techID);
         t.setAssignedTechnicianEmail(techEmail);
         t.setStatus(Status.ASSIGNED);
-
+        
+        AuditService.addAuditLog(user.getUserID(), AuditAction.ASSIGN, AuditEntity.TICKET, ticketID, user.getName() + " assigned " + techEmail + " to ticket #" + ticketID);
+        
         ticketDAO.updateTicket(t);
     }
 
-    public void unassignTicket(int ticketID, User actor) {
+    public void unassignTicket(int ticketID, User user) {
 
         Ticket t = ticketDAO.getTicketByID(ticketID);
         if (t == null) return;
 
-        if (!canModifyTicket(t, actor)) return;
+        if (!canModifyTicket(t, user)) return;
+
+        AuditService.addAuditLog(user.getUserID(), AuditAction.UNASSIGN, AuditEntity.TICKET, ticketID, user.getName() + " unassigned " + t.getAssignedTechnicianEmail() + " from ticket #" + ticketID);
 
         t.setAssignedTechnicianID(0);
         t.setAssignedTechnicianEmail(null);
         t.setStatus(Status.OPEN);
-
+        
         ticketDAO.updateTicket(t);
     }
 
-    // =========================
-    // STATUS (FIXED)
-    // =========================
-    public void updateStatus(int ticketID, Status status, User actor) {
+    public void updateStatus(int ticketID, Status status, User user) {
 
         Ticket t = ticketDAO.getTicketByID(ticketID);
         if (t == null) return;
 
-        if (!canModifyTicket(t, actor)) return;
+        if (!canModifyTicket(t, user)) return;
 
+        AuditService.addAuditLog(user.getUserID(), AuditAction.STATUS, AuditEntity.TICKET, ticketID, user.getName() + " changed ticket #" + t.getTicketID() + " status from "+ t.getStatus() + " to " + status);
+        
         t.setStatus(status);
+        
         ticketDAO.updateTicket(t);
     }
 
-    // =========================
-    // PRIORITY (FIXED)
-    // =========================
-    public void updatePriority(int ticketID, Priority priority, User actor) {
+    public void updatePriority(int ticketID, Priority priority, User user) {
 
         Ticket t = ticketDAO.getTicketByID(ticketID);
         if (t == null) return;
 
-        if (!canModifyTicket(t, actor)) return;
+        if (!canModifyTicket(t, user)) return;
 
+        AuditService.addAuditLog(user.getUserID(), AuditAction.PRIORITY, AuditEntity.TICKET, ticketID, user.getName() + " changed ticket #" + t.getTicketID() + " priortiy from "+ t.getPriority() + " to " + priority);
+        
         t.setPriority(priority);
         ticketDAO.updateTicket(t);
     }
 
-    // =========================
-    // CLOSE
-    // =========================
-    public void closeTicket(int ticketID, User actor) {
-
-        updateStatus(ticketID, Status.CLOSED, actor);
+    public void closeTicket(int ticketID, User user) {
+    	
+    	AuditService.addAuditLog(user.getUserID(), AuditAction.CLOSE, AuditEntity.TICKET, ticketID, user.getName() + " closed ticket #" + ticketID);
+        updateStatus(ticketID, Status.CLOSED, user);
     }
 
-    // =========================
-    // COMMENTS
-    // =========================
     public void addComment(int ticketID, String title,
-                           String desc, String user) {
+                           String desc, User user) {
+    	
+    	AuditService.addAuditLog(user.getUserID(), AuditAction.COMMENT, AuditEntity.TICKET, ticketID, user.getName() + " commented on ticket #" + ticketID + " '" + title + "'");
 
         ticketDAO.addComment(
                 ticketID,
-                new Comment(title, desc, user, LocalDateTime.now())
+                new Comment(title, desc, user.getEmail(), LocalDateTime.now())
         );
     }
 
-    // =========================
-    // SECURITY CORE LOGIC
-    // =========================
     private boolean canModifyTicket(Ticket t, User actor) {
 
         if (actor instanceof Admin) {
