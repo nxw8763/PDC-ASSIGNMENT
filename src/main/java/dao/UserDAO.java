@@ -163,9 +163,6 @@ public class UserDAO {
         }
     }
 
-    // =========================
-    // AUTHENTICATION (CORE)
-    // =========================
     public User authenticate(String username, String password) {
 
         String sql =
@@ -197,9 +194,7 @@ public class UserDAO {
         }
     }
 
-    // =========================
-    // FACTORY METHOD
-    // =========================
+    // factory method
     private User createUser(int id,
                             String username,
                             String role,
@@ -251,5 +246,31 @@ public class UserDAO {
 
             default -> null;
         };
+    }
+    
+    // validation
+    public boolean usernameExists(String username) {
+
+        String sql =
+                "SELECT 1 FROM USERS WHERE USERNAME = ?";
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement stmt =
+                        conn.prepareStatement(sql)
+        ) {
+
+            stmt.setString(1, username);
+
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+        }
     }
 }

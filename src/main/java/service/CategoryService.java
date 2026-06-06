@@ -27,6 +27,7 @@ public class CategoryService {
             throw new SecurityException(
                     "Only administrators can add categories.");
         }
+        validateCategory(category);
         AuditService.addAuditLog(currentUser.getUserID(), AuditAction.CREATE, AuditEntity.CATEGORY, currentUser.getUserID(), currentUser.getUsername() + " created category " + category);
         categoryDAO.addCategory(category);
     }
@@ -40,5 +41,35 @@ public class CategoryService {
         }
         AuditService.addAuditLog(currentUser.getUserID(), AuditAction.DELETE, AuditEntity.CATEGORY, currentUser.getUserID(), currentUser.getUsername() + " deleated category " + category);
         categoryDAO.deleteCategory(category);
+    }
+    
+    private void validateCategory(String category) {
+
+        if(category == null) {
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
+        }
+
+        category = category.trim();
+
+        if(category.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
+        }
+
+        if(category.length() > 100) {
+            throw new IllegalArgumentException(
+                    "Category cannot exceed 100 characters."
+            );
+        }
+        
+        if(categoryDAO.categoryExists(category)) {
+
+            throw new IllegalArgumentException(
+                    "Category already exists."
+            );
+        }
     }
 }

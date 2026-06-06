@@ -21,6 +21,8 @@ public class TicketManagementService {
                                String category, Priority priority,
                                User creator) {
 
+    	validateTicket(title, desc, category);
+    	
         Ticket t = new Ticket(
                 0,
                 title,
@@ -160,5 +162,29 @@ public class TicketManagementService {
 
         // employees cannot modify tickets
         return false;
+    }
+    
+    private void validateTicket(
+            String title,
+            String description,
+            String category) {
+
+        if(title == null || title.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Title is required."
+            );
+        }
+
+        if(description == null || description.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Description is required."
+            );
+        }
+
+        if(category == null || category.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
+        }
     }
 }

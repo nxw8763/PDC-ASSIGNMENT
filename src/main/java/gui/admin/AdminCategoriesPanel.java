@@ -51,8 +51,18 @@ public class AdminCategoriesPanel extends JPanel {
 
         String c = JOptionPane.showInputDialog(this, "Category");
         if (c == null) return;
-
-        service.addCategory(admin, c);
+        
+        try {
+        	service.addCategory(admin, c);
+	    } catch (IllegalArgumentException ex) {
+	
+	        JOptionPane.showMessageDialog(
+	                this,
+	                ex.getMessage(),
+	                "Validation Error",
+	                JOptionPane.ERROR_MESSAGE
+	        );
+	    }
         load();
     }
 
@@ -61,7 +71,17 @@ public class AdminCategoriesPanel extends JPanel {
         String selected = list.getSelectedValue();
         if (selected == null) return;
 
-        service.deleteCategory(admin, selected);
+        try {
+        	service.deleteCategory(admin, selected);
+        } catch (IllegalArgumentException ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
         load();
     }
 }

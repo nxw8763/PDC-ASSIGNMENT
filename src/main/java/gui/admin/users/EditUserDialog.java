@@ -73,7 +73,7 @@ public class EditUserDialog extends JDialog {
     private void saveChanges(Admin admin) {
 
         int id = user.getUserID();
-
+        try {
         userService.updateUserField(
         		admin,
                 id,
@@ -121,5 +121,14 @@ public class EditUserDialog extends JDialog {
         );
 
         dispose();
+        } catch (IllegalArgumentException ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 }

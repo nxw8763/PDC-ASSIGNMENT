@@ -58,4 +58,27 @@ public class CategoryDAO {
             e.printStackTrace();
         }
     }
+    
+    public boolean categoryExists(String category) {
+
+        String sql =
+                "SELECT 1 FROM CATEGORIES WHERE CATEGORY_NAME = ?";
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement stmt =
+                        conn.prepareStatement(sql)
+        ) {
+
+            stmt.setString(1, category);
+
+            return stmt.executeQuery().next();
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+        }
+    }
 }

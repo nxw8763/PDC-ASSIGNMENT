@@ -73,15 +73,25 @@ public class CreateUserDialog extends JDialog {
 
         String role = (String) form.getRoleBox().getSelectedItem();
 
-        userService.createUser(
-        		admin,
-                name,
-                username,
-                password,
-                role,
-                email
-        );
+        try {
+	        userService.createUser(
+	        		admin,
+	                name,
+	                username,
+	                password,
+	                role,
+	                email
+	        		);
+	        dispose();
+	    } catch (IllegalArgumentException ex) {
+	
+	        JOptionPane.showMessageDialog(
+	                this,
+	                ex.getMessage(),
+	                "Validation Error",
+	                JOptionPane.ERROR_MESSAGE
+	        );
+	    }
 
-        dispose();
     }
 }
