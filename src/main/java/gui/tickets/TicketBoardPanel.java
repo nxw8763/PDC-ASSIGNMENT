@@ -3,15 +3,14 @@ package gui.tickets;
 import gui.admin.AdminTicketDetailsDialog;
 import gui.employee.EmployeeTicketDetailsDialog;
 import gui.technician.TechnicianTicketDetailsDialog;
-
-import model.Admin;
-import model.Employee;
-import model.Technician;
-import model.Ticket;
-import model.User;
 import model.enums.Status;
-import service.TicketManagementService;
-import service.UserManagementService;
+import model.tickets.Ticket;
+import model.users.Admin;
+import model.users.Employee;
+import model.users.Technician;
+import model.users.User;
+import service.TicketService;
+import service.UserService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,8 +19,8 @@ import java.util.List;
 public class TicketBoardPanel extends JPanel {
 
     private final User currentUser;
-    private final TicketManagementService ticketService;
-    private final UserManagementService userService;
+    private final TicketService ticketService;
+    private final UserService userService;
     
     private final KanbanColumnPanel openColumn;
     private final KanbanColumnPanel assignedColumn;
@@ -30,8 +29,8 @@ public class TicketBoardPanel extends JPanel {
 
     public TicketBoardPanel(
             User currentUser,
-            UserManagementService userService,
-            TicketManagementService ticketService
+            UserService userService,
+            TicketService ticketService
     ) {
 
         this.currentUser = currentUser;

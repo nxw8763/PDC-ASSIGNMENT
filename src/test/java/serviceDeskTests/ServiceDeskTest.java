@@ -11,16 +11,16 @@ import dao.CategoryDAO;
 import dao.TicketDAO;
 import dao.UserDAO;
 import database.DatabaseInitializer;
-import model.Admin;
-import model.Employee;
-import model.Technician;
-import model.Ticket;
-import model.User;
 import model.enums.Priority;
 import model.enums.Status;
+import model.tickets.Ticket;
+import model.users.Admin;
+import model.users.Employee;
+import model.users.Technician;
+import model.users.User;
 import service.CategoryService;
-import service.TicketManagementService;
-import service.UserManagementService;
+import service.TicketService;
+import service.UserService;
 
 public class ServiceDeskTest {
 
@@ -28,8 +28,8 @@ public class ServiceDeskTest {
     private static TicketDAO ticketDAO;
     private static CategoryDAO categoryDAO;
 
-    private static UserManagementService userService;
-    private static TicketManagementService ticketService;
+    private static UserService userService;
+    private static TicketService ticketService;
     private static CategoryService categoryService;
 
     private static Admin admin;
@@ -50,8 +50,8 @@ public class ServiceDeskTest {
         ticketDAO = new TicketDAO();
         categoryDAO = new CategoryDAO();
 
-        userService = new UserManagementService(userDAO);
-        ticketService = new TicketManagementService(ticketDAO);
+        userService = new UserService(userDAO);
+        ticketService = new TicketService(ticketDAO);
         categoryService = new CategoryService(categoryDAO);
 
         admin =

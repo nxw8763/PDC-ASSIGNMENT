@@ -7,24 +7,24 @@ import javax.swing.SwingUtilities;
 import gui.abstracts.AbstractDashboardPanel;
 import gui.admin.users.UserManagementPanel;
 import gui.tickets.TicketBoardPanel;
-import model.Admin;
-import model.Ticket;
+import model.tickets.Ticket;
+import model.users.Admin;
 import service.CategoryService;
-import service.TicketManagementService;
-import service.UserManagementService;
+import service.TicketService;
+import service.UserService;
 
 public class AdminDashboardPanel extends AbstractDashboardPanel {
 
     private final Admin admin;
 
-    private final UserManagementService userService;
-    private final TicketManagementService ticketService;
+    private final UserService userService;
+    private final TicketService ticketService;
     private final CategoryService categoryService;
 
     public AdminDashboardPanel(
             Admin admin,
-            UserManagementService userService,
-            TicketManagementService ticketService,
+            UserService userService,
+            TicketService ticketService,
             CategoryService categoryService
     ) {
 
@@ -45,7 +45,7 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
 
         registerPage(
                 "overview",
-                new AdminOverviewPanel(admin, ticketService)
+                new AdminOverviewPanel(admin)
         );
 
         registerPage(

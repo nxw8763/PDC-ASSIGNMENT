@@ -1,8 +1,8 @@
 package gui.employee;
 
-import model.Employee;
-import model.Ticket;
-import service.TicketManagementService;
+import model.tickets.Ticket;
+import model.users.Employee;
+import service.TicketService;
 import gui.tickets.TicketCard;
 
 import javax.swing.*;
@@ -13,13 +13,13 @@ import java.util.List;
 public class MyTicketsPanel extends JPanel {
 
     private final Employee employee;
-    private final TicketManagementService ticketService;
+    private final TicketService ticketService;
 
     private JPanel cardsPanel;
     private JComboBox<String> sortBox;
 
     public MyTicketsPanel(Employee employee,
-                          TicketManagementService ticketService) {
+                          TicketService ticketService) {
 
         this.employee = employee;
         this.ticketService = ticketService;

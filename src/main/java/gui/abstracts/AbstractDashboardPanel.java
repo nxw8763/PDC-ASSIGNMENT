@@ -1,9 +1,10 @@
 package gui.abstracts;
 
-import model.User;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import model.users.User;
+
 import java.awt.*;
 
 public abstract class AbstractDashboardPanel extends JPanel {

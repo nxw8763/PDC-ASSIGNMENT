@@ -1,9 +1,14 @@
 package gui.login;
 
-import model.User;
-import service.UserManagementService;
+import service.CategoryService;
+import service.TicketService;
+import service.UserService;
 
 import javax.swing.*;
+
+import gui.abstracts.AbstractDashboardPanel;
+import model.users.User;
+
 import java.awt.*;
 
 public class LoginPanel extends JPanel {
@@ -13,12 +18,16 @@ public class LoginPanel extends JPanel {
     private JTextField usernameField;
     private JPasswordField passwordField;
 
-    private final UserManagementService userService;
-
+    private final TicketService ticketService;
+    private final CategoryService categoryService;
+    private final UserService userService;
+    
     public LoginPanel(JFrame frame,
-                      UserManagementService userService) {
+                      TicketService ticketService, CategoryService categoryService, UserService userService) {
 
         this.frame = frame;
+        this.ticketService = ticketService;
+        this.categoryService = categoryService;
         this.userService = userService;
 
         buildUI();
@@ -85,10 +94,26 @@ public class LoginPanel extends JPanel {
             return;
         }
 
-        DashboardLauncher.launchDashboard(
-                frame,
-                user,
-                userService
-        );
+        AbstractDashboardPanel dashboard =
+                DashboardFactory.createDashboard(
+                        user,
+                        ticketService,
+                        categoryService,
+                        userService
+                );
+
+        dashboard.setLogoutAction(() -> {
+
+            frame.setContentPane(
+                    new LoginPanel(frame, ticketService, categoryService, userService)
+            );
+
+            frame.revalidate();
+            frame.repaint();
+        });
+
+        frame.setContentPane(dashboard);
+        frame.revalidate();
+        frame.repaint();
     }
 }

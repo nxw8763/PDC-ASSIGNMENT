@@ -1,10 +1,10 @@
 package service;
 
 import dao.CategoryDAO;
-import model.Admin;
-import model.User;
 import model.enums.AuditAction;
 import model.enums.AuditEntity;
+import model.users.Admin;
+import model.users.User;
 
 import java.util.List;
 

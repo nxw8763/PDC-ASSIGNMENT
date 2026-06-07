@@ -1,16 +1,16 @@
 package gui.admin.users;
 
-import service.UserManagementService;
+import service.UserService;
 
 import javax.swing.*;
 
-import model.Admin;
+import model.users.Admin;
 
 import java.awt.*;
 
 public class CreateUserDialog extends JDialog {
 
-    private final UserManagementService userService;
+    private final UserService userService;
 
     private final UserFormPanel form =
             new UserFormPanel();
@@ -18,7 +18,7 @@ public class CreateUserDialog extends JDialog {
     public CreateUserDialog(
             Window owner,
             Admin admin,
-            UserManagementService userService
+            UserService userService
     ) {
 
         super(owner, "Create User", ModalityType.APPLICATION_MODAL);

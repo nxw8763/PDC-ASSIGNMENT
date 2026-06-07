@@ -1,9 +1,10 @@
 package gui.tickets;
 
-import model.Ticket;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import model.tickets.Ticket;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 

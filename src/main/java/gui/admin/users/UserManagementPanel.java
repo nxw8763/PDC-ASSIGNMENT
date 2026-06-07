@@ -1,15 +1,17 @@
 package gui.admin.users;
 
-import model.Admin;
-import model.User;
-import service.UserManagementService;
+import service.UserService;
 
 import javax.swing.*;
+
+import model.users.Admin;
+import model.users.User;
+
 import java.awt.*;
 
 public class UserManagementPanel extends JPanel {
 
-    private final UserManagementService userService;
+    private final UserService userService;
 
     private final UserTableModel tableModel =
             new UserTableModel();
@@ -19,7 +21,7 @@ public class UserManagementPanel extends JPanel {
     private JTable table;
 
     public UserManagementPanel(
-            Admin admin, UserManagementService userService
+            Admin admin, UserService userService
     ) {
 
         this.userService = userService;

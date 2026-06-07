@@ -3,12 +3,13 @@ package gui.login;
 import javax.swing.*;
 
 import dao.UserDAO;
-
-import service.UserManagementService;
+import service.CategoryService;
+import service.TicketService;
+import service.UserService;
 
 public class LoginFrame extends JFrame {
 
-    public LoginFrame() {
+    public LoginFrame(TicketService ticketService, CategoryService categoryService, UserService userService) {
 
         super("Service Desk Login");
 
@@ -16,13 +17,11 @@ public class LoginFrame extends JFrame {
         setSize(500, 350);
         setLocationRelativeTo(null);
 
-        // for authenticating user
-        UserManagementService userService =
-                new UserManagementService(new UserDAO());
-
         setContentPane(
                 new LoginPanel(
                         this,
+                        ticketService,
+                        categoryService,
                         userService
                 )
         );

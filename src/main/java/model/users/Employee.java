@@ -1,4 +1,4 @@
-package model;
+package model.users;
 
 public class Employee extends User {
     public Employee(int userID, String username,String name, String email) {

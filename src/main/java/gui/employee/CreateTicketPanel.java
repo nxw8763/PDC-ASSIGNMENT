@@ -1,10 +1,10 @@
 package gui.employee;
 
-import model.Employee;
-import model.Ticket;
 import model.enums.Priority;
+import model.tickets.Ticket;
+import model.users.Employee;
 import service.CategoryService;
-import service.TicketManagementService;
+import service.TicketService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ import java.awt.*;
 public class CreateTicketPanel extends JPanel {
 
     private final Employee employee;
-    private final TicketManagementService ticketService;
+    private final TicketService ticketService;
     private final CategoryService categoryService;
 
     private JTextField titleField;
@@ -22,7 +22,7 @@ public class CreateTicketPanel extends JPanel {
 
     public CreateTicketPanel(
             Employee employee,
-            TicketManagementService ticketService,
+            TicketService ticketService,
             CategoryService categoryService) {
 
         this.employee = employee;

@@ -4,6 +4,8 @@ import database.DatabaseConnection;
 import model.*;
 import model.enums.Priority;
 import model.enums.Status;
+import model.tickets.Comment;
+import model.tickets.Ticket;
 
 import java.sql.*;
 import java.util.ArrayList;

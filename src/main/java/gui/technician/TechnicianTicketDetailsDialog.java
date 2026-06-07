@@ -3,7 +3,9 @@ package gui.technician;
 import model.*;
 import model.enums.Priority;
 import model.enums.Status;
-import service.TicketManagementService;
+import model.tickets.Ticket;
+import model.users.Technician;
+import service.TicketService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +16,13 @@ import gui.abstracts.AbstractTicketDetailsDialog;
 public class TechnicianTicketDetailsDialog extends AbstractTicketDetailsDialog {
 
     private final Technician technician;
-    private final TicketManagementService ticketService;
+    private final TicketService ticketService;
 
     public TechnicianTicketDetailsDialog(
             Window owner,
             Ticket ticket,
             Technician technician,
-            TicketManagementService ticketService
+            TicketService ticketService
     ) {
         super(owner, ticket);
 

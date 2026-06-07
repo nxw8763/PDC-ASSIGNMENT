@@ -4,14 +4,17 @@ import dao.UserDAO;
 import model.*;
 import model.enums.AuditAction;
 import model.enums.AuditEntity;
+import model.users.Admin;
+import model.users.Technician;
+import model.users.User;
 
 import java.util.List;
 
-public class UserManagementService {
+public class UserService {
 
     private final UserDAO userDAO;
 
-    public UserManagementService(UserDAO userDAO) {
+    public UserService(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
 

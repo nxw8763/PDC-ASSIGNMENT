@@ -1,14 +1,14 @@
 package gui.employee;
 
 import gui.abstracts.AbstractDashboardPanel;
-import model.Employee;
+import model.users.Employee;
 import service.CategoryService;
-import service.TicketManagementService;
+import service.TicketService;
 
 public class EmployeeDashboardPanel extends AbstractDashboardPanel {
 
     private final Employee employee;
-    private final TicketManagementService ticketService;
+    private final TicketService ticketService;
     private final CategoryService categoryService;
 
     public static final String MY_TICKETS = "MY_TICKETS";
@@ -16,7 +16,7 @@ public class EmployeeDashboardPanel extends AbstractDashboardPanel {
 
     public EmployeeDashboardPanel(
             Employee employee,
-            TicketManagementService ticketService,
+            TicketService ticketService,
             CategoryService categoryService
     ) {
         super(employee);

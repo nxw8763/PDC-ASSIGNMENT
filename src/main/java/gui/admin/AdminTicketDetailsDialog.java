@@ -1,14 +1,13 @@
 package gui.admin;
 
 import gui.abstracts.AbstractTicketDetailsDialog;
-
-import model.Admin;
-import model.Technician;
-import model.Ticket;
 import model.enums.Priority;
 import model.enums.Status;
-import service.TicketManagementService;
-import service.UserManagementService;
+import model.tickets.Ticket;
+import model.users.Admin;
+import model.users.Technician;
+import service.TicketService;
+import service.UserService;
 
 import java.util.List;
 import javax.swing.*;
@@ -18,15 +17,15 @@ public class AdminTicketDetailsDialog
         extends AbstractTicketDetailsDialog {
 
     private final Admin admin;
-    private final UserManagementService userService;
-    private final TicketManagementService ticketService;
+    private final UserService userService;
+    private final TicketService ticketService;
 
     public AdminTicketDetailsDialog(
             Window owner,
             Ticket ticket,
             Admin admin,
-            UserManagementService userService,
-            TicketManagementService ticketService
+            UserService userService,
+            TicketService ticketService
     ) {
         super(owner, ticket);
 
@@ -265,12 +264,7 @@ public class AdminTicketDetailsDialog
 
     private void reopenTicket() {
 
-        ticketService.updateStatus(
-                ticket.getTicketID(),
-                Status.OPEN,
-                admin
-        );
-
+    	ticketService.unassignTicket(ticket.getTicketID(), admin);
         loadTicket();
     }
 }

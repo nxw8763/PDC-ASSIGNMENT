@@ -1,8 +1,9 @@
 package gui.admin.users;
 
-import model.User;
-
 import javax.swing.table.AbstractTableModel;
+
+import model.users.User;
+
 import java.util.ArrayList;
 import java.util.List;
 

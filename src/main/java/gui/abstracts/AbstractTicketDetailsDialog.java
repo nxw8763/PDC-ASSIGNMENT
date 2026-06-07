@@ -1,10 +1,11 @@
 package gui.abstracts;
 
-import model.Comment;
-import model.Ticket;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import model.tickets.Comment;
+import model.tickets.Ticket;
+
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
 

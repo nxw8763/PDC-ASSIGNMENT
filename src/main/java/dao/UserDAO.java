@@ -2,6 +2,10 @@ package dao;
 
 import database.DatabaseConnection;
 import model.*;
+import model.users.Admin;
+import model.users.Employee;
+import model.users.Technician;
+import model.users.User;
 
 import java.sql.*;
 import java.util.ArrayList;

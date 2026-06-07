@@ -3,7 +3,13 @@ package main;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import dao.CategoryDAO;
+import dao.TicketDAO;
+import dao.UserDAO;
 import gui.login.LoginFrame;
+import service.CategoryService;
+import service.TicketService;
+import service.UserService;
 import database.DatabaseInitializer;
 
 public class Main {
@@ -36,9 +42,18 @@ public class Main {
 
 		    System.exit(1);
 		}
+	   
+	   TicketDAO ticketDAO = new TicketDAO();
+	   CategoryDAO categoryDAO = new CategoryDAO();
+	   UserDAO userDAO = new UserDAO();
+
+	   TicketService ticketService = new TicketService(ticketDAO);
+	   CategoryService categoryService = new CategoryService(categoryDAO);
+	   UserService userService = new UserService(userDAO);
+	   
         SwingUtilities.invokeLater(() -> {
 
-            new LoginFrame();
+            new LoginFrame(ticketService, categoryService, userService);
 
         });
     }

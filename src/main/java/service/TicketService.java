@@ -4,16 +4,22 @@ import dao.TicketDAO;
 
 import model.*;
 import model.enums.*;
+import model.tickets.Comment;
+import model.tickets.Ticket;
+import model.users.Admin;
+import model.users.Employee;
+import model.users.Technician;
+import model.users.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TicketManagementService {
+public class TicketService {
 
     private final TicketDAO ticketDAO;
 
-    public TicketManagementService(TicketDAO ticketDAO) {
+    public TicketService(TicketDAO ticketDAO) {
         this.ticketDAO = ticketDAO;
     }
 

@@ -4,7 +4,7 @@ import service.CategoryService;
 
 import javax.swing.*;
 
-import model.Admin;
+import model.users.Admin;
 
 import java.awt.*;
 

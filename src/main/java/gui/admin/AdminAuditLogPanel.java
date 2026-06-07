@@ -1,7 +1,7 @@
 package gui.admin;
 
-import model.Admin;
 import model.AuditLog;
+import model.users.Admin;
 import service.AuditService;
 
 import javax.swing.*;

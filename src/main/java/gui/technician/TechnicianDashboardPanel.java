@@ -6,18 +6,18 @@ import javax.swing.SwingUtilities;
 
 import gui.abstracts.AbstractDashboardPanel;
 import gui.tickets.TicketBoardPanel;
-import model.Technician;
-import model.Ticket;
-import service.TicketManagementService;
+import model.tickets.Ticket;
+import model.users.Technician;
+import service.TicketService;
 
 public class TechnicianDashboardPanel extends AbstractDashboardPanel {
 
     private final Technician technician;
-    private final TicketManagementService ticketService;
+    private final TicketService ticketService;
 
     public TechnicianDashboardPanel(
             Technician technician,
-            TicketManagementService ticketService
+            TicketService ticketService
     ) {
         super(technician);
 

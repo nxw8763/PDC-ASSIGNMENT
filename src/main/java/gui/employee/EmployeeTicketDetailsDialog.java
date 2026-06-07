@@ -1,9 +1,9 @@
 package gui.employee;
 
-import model.Comment;
-import model.Employee;
-import model.Ticket;
-import service.TicketManagementService;
+import model.tickets.Comment;
+import model.tickets.Ticket;
+import model.users.Employee;
+import service.TicketService;
 
 import javax.swing.*;
 
@@ -16,13 +16,13 @@ public class EmployeeTicketDetailsDialog
         extends AbstractTicketDetailsDialog {
 
     private final Employee employee;
-    private final TicketManagementService ticketService;
+    private final TicketService ticketService;
 
     public EmployeeTicketDetailsDialog(
             Window owner,
             Ticket ticket,
             Employee employee,
-            TicketManagementService ticketService
+            TicketService ticketService
     ) {
 
         super(owner, ticket);
