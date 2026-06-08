@@ -98,6 +98,27 @@ public class UserService {
 
             user.setEmail(value);
         }
+        case "name" -> {
+
+            if (value == null || value.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Name cannot be blank."
+                );
+            }
+
+            user.setName(value);
+        }
+        
+        case "role" -> {
+
+            if (value == null || value.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Role cannot be blank."
+                );
+            }
+
+            user.setRole(value);
+        }
     }
         
         userDAO.updateUser(user);
