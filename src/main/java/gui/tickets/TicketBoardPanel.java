@@ -1,43 +1,41 @@
 package gui.tickets;
 
-import gui.admin.AdminTicketDetailsDialog;
-import gui.employee.EmployeeTicketDetailsDialog;
-import gui.technician.TechnicianTicketDetailsDialog;
-import model.enums.Status;
-import model.tickets.Ticket;
-import model.users.Admin;
-import model.users.Employee;
-import model.users.Technician;
+import controller.TicketController;
 import model.users.User;
-import service.TicketService;
-import service.UserService;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class TicketBoardPanel extends JPanel {
+public class TicketBoardPanel
+        extends JPanel
+        implements TicketBoardView {
 
     private final User currentUser;
-    private final TicketService ticketService;
-    private final UserService userService;
-    
+
+    private final TicketController controller;
+
     private final KanbanColumnPanel openColumn;
+
     private final KanbanColumnPanel assignedColumn;
+
     private final KanbanColumnPanel progressColumn;
+
     private final KanbanColumnPanel resolvedColumn;
 
     public TicketBoardPanel(
             User currentUser,
-            UserService userService,
-            TicketService ticketService
-    ) {
+            TicketController controller) {
 
-        this.currentUser = currentUser;
-        this.userService = userService;
-        this.ticketService = ticketService;
+        this.currentUser =
+                currentUser;
 
-        setLayout(new BorderLayout());
+        this.controller =
+                controller;
+
+        setLayout(
+                new BorderLayout()
+        );
 
         JPanel boardPanel =
                 new JPanel(
@@ -49,140 +47,107 @@ public class TicketBoardPanel extends JPanel {
                         )
                 );
 
-        boardPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        15,
-                        15,
-                        15,
-                        15
-                )
-        );
-
         openColumn =
-                new KanbanColumnPanel("OPEN");
+                new KanbanColumnPanel(
+                        "OPEN"
+                );
 
         assignedColumn =
-                new KanbanColumnPanel("ASSIGNED");
+                new KanbanColumnPanel(
+                        "ASSIGNED"
+                );
 
         progressColumn =
-                new KanbanColumnPanel("IN PROGRESS");
+                new KanbanColumnPanel(
+                        "IN PROGRESS"
+                );
 
         resolvedColumn =
-                new KanbanColumnPanel("RESOLVED");
+                new KanbanColumnPanel(
+                        "RESOLVED"
+                );
 
         boardPanel.add(openColumn);
         boardPanel.add(assignedColumn);
         boardPanel.add(progressColumn);
         boardPanel.add(resolvedColumn);
 
-        JScrollPane scrollPane =
-                new JScrollPane(boardPanel);
+        add(
+                new JScrollPane(
+                        boardPanel
+                ),
+                BorderLayout.CENTER
+        );
 
-        scrollPane.setBorder(null);
-
-        add(scrollPane, BorderLayout.CENTER);
-
-        refreshBoard();
+        controller.loadBoard(
+                currentUser,
+                this,
+                this
+        );
     }
 
     public void refreshBoard() {
 
-        List<Ticket> tickets =
-                ticketService.getVisibleTickets(currentUser);
-
-        setTickets(tickets);
+        controller.loadBoard(
+                currentUser,
+                this,
+                this
+        );
     }
 
-    private void setTickets(List<Ticket> tickets) {
+    @Override
+    public void displayOpenTickets(
+            List<Component> cards) {
 
         openColumn.clearCards();
+
+        for (Component card : cards) {
+
+            openColumn.addCard(
+                    (TicketCard) card
+            );
+        }
+    }
+
+    @Override
+    public void displayAssignedTickets(
+            List<Component> cards) {
+
         assignedColumn.clearCards();
+
+        for (Component card : cards) {
+
+            assignedColumn.addCard(
+                    (TicketCard) card
+            );
+        }
+    }
+
+    @Override
+    public void displayInProgressTickets(
+            List<Component> cards) {
+
         progressColumn.clearCards();
+
+        for (Component card : cards) {
+
+            progressColumn.addCard(
+                    (TicketCard) card
+            );
+        }
+    }
+
+    @Override
+    public void displayResolvedTickets(
+            List<Component> cards) {
+
         resolvedColumn.clearCards();
 
-        for (Ticket ticket : tickets) {
+        for (Component card : cards) {
 
-            TicketCard card =
-                    new TicketCard(
-                            ticket,
-                            () -> openTicket(ticket)
-                    );
-
-            switch (ticket.getStatus()) {
-
-                case OPEN ->
-                        openColumn.addCard(card);
-
-                case ASSIGNED ->
-                        assignedColumn.addCard(card);
-
-                case IN_PROGRESS ->
-                        progressColumn.addCard(card);
-
-                case RESOLVED ->
-                        resolvedColumn.addCard(card);
-
-                default -> {
-                }
-            }
-        }
-
-        revalidate();
-        repaint();
-    }
-
-    private void openTicket(Ticket ticket) {
-
-        Window owner =
-                SwingUtilities.getWindowAncestor(this);
-
-        JDialog dialog = createDialog(owner, ticket);
-
-        if (dialog == null) {
-            return;
-        }
-
-        dialog.setVisible(true);
-
-        refreshBoard();
-    }
-
-    private JDialog createDialog(
-            Window owner,
-            Ticket ticket
-    ) {
-
-        if (currentUser instanceof Employee employee) {
-
-            return new EmployeeTicketDetailsDialog(
-                    owner,
-                    ticket,
-                    employee,
-                    ticketService
+            resolvedColumn.addCard(
+                    (TicketCard) card
             );
         }
-
-        if (currentUser instanceof Technician technician) {
-
-            return new TechnicianTicketDetailsDialog(
-                    owner,
-                    ticket,
-                    technician,
-                    ticketService
-            );
-        }
-
-        if (currentUser instanceof Admin admin) {
-
-            return new AdminTicketDetailsDialog(
-                    owner,
-                    ticket,
-                    admin,
-                    userService,
-                    ticketService
-            );
-        }
-
-        return null;
     }
 }

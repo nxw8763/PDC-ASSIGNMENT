@@ -1,18 +1,22 @@
 package gui.admin.users;
 
-import service.UserService;
+import controller.UserController;
+import dto.UserDTO;
+import dto.UserFormDTO;
+import model.users.Admin;
 
 import javax.swing.*;
-
-import model.users.Admin;
-import model.users.User;
-
 import java.awt.*;
 
-public class EditUserDialog extends JDialog {
+public class EditUserDialog
+        extends JDialog
+        implements UserFormView {
 
-    private final User user;
-    private final UserService userService;
+    private final Admin admin;
+
+    private final int userId;
+
+    private final UserController controller;
 
     private final UserFormPanel form =
             new UserFormPanel();
@@ -20,31 +24,40 @@ public class EditUserDialog extends JDialog {
     public EditUserDialog(
             Window owner,
             Admin admin,
-            User user,
-            UserService userService
-    ) {
+            UserDTO user,
+            UserController controller) {
 
-        super(owner, "Edit User", ModalityType.APPLICATION_MODAL);
+        super(
+                owner,
+                "Edit User",
+                ModalityType.APPLICATION_MODAL
+        );
 
-        this.user = user;
-        this.userService = userService;
+        this.admin = admin;
+        this.userId = user.getUserId();
+        this.controller = controller;
 
-        initialise(admin);
+        initialise(user);
     }
 
-    private void initialise(Admin admin) {
+    private void initialise(
+            UserDTO user) {
 
-        form.getUsernameField()
-                .setText(user.getUsername());
+        form.setUsername(
+                user.getUsername()
+        );
 
-        form.getNameField()
-                .setText(user.getName());
+        form.setName(
+                user.getName()
+        );
 
-        form.getEmailField()
-                .setText(user.getEmail());
+        form.setEmail(
+                user.getEmail()
+        );
 
-        form.getRoleBox()
-                .setSelectedItem(user.getRole());
+        form.setRole(
+                user.getRole()
+        );
 
         setLayout(new BorderLayout());
 
@@ -54,14 +67,19 @@ public class EditUserDialog extends JDialog {
                 new JButton("Save");
 
         saveButton.addActionListener(
-                e -> saveChanges(admin)
-        );
-
-        JPanel bottom = new JPanel(
-                new FlowLayout(
-                        FlowLayout.RIGHT
+                e -> controller.updateUser(
+                        admin,
+                        userId,
+                        this
                 )
         );
+
+        JPanel bottom =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT
+                        )
+                );
 
         bottom.add(saveButton);
 
@@ -72,65 +90,33 @@ public class EditUserDialog extends JDialog {
         setLocationRelativeTo(getOwner());
     }
 
-    private void saveChanges(Admin admin) {
+    @Override
+    public UserFormDTO getFormData() {
 
-        int id = user.getUserID();
-        try {
-        userService.updateUserField(
-        		admin,
-                id,
-                "username",
-                form.getUsernameField().getText()
+        return new UserFormDTO(
+                form.getUsername(),
+                form.getName(),
+                form.getEmail(),
+                form.getPassword(),
+                form.getRole()
         );
+    }
 
-        userService.updateUserField(
-        		admin,
-                id,
-                "name",
-                form.getNameField().getText()
-        );
-
-        userService.updateUserField(
-        		admin,
-                id,
-                "email",
-                form.getEmailField().getText()
-        );
-
-        String password =
-                new String(
-                        form.getPasswordField().getPassword()
-                );
-
-        if (!password.isBlank()) {
-
-            userService.updateUserPassword(
-            		admin,
-                    id,
-                    password
-            );
-        }
-
-        String role =
-                (String) form.getRoleBox()
-                        .getSelectedItem();
-
-        userService.updateUserField(
-        		admin,
-                id,
-                "role",
-                role
-        );
+    @Override
+    public void close() {
 
         dispose();
-        } catch (IllegalArgumentException ex) {
+    }
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Validation Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+    @Override
+    public void showError(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }

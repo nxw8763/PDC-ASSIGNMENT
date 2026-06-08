@@ -1,28 +1,29 @@
 package gui.technician;
 
-import java.awt.Window;
-
-import javax.swing.SwingUtilities;
-
 import gui.abstracts.AbstractDashboardPanel;
 import gui.tickets.TicketBoardPanel;
-import model.tickets.Ticket;
+import main.AppContext;
 import model.users.Technician;
-import service.TicketService;
 
-public class TechnicianDashboardPanel extends AbstractDashboardPanel {
+public class TechnicianDashboardPanel
+        extends AbstractDashboardPanel {
 
     private final Technician technician;
-    private final TicketService ticketService;
+
+    private final AppContext context;
 
     public TechnicianDashboardPanel(
             Technician technician,
-            TicketService ticketService
-    ) {
-        super(technician);
+            AppContext context) {
 
-        this.technician = technician;
-        this.ticketService = ticketService;
+        super(
+                technician
+        );
+
+        this.technician =
+                technician;
+
+        this.context = context;
 
         buildPages();
         buildNavigation();
@@ -30,12 +31,12 @@ public class TechnicianDashboardPanel extends AbstractDashboardPanel {
 
     @Override
     protected void buildPages() {
-       registerPage(
+
+        registerPage(
                 "KANBAN_BOARD",
                 new TicketBoardPanel(
                         technician,
-                        null,
-                        ticketService
+                        context.getTicketController()
                 )
         );
 
@@ -47,6 +48,10 @@ public class TechnicianDashboardPanel extends AbstractDashboardPanel {
 
     @Override
     protected void buildNavigation() {
-        createNavButton("Ticket Board", "KANBAN_BOARD");
+
+        createNavButton(
+                "Ticket Board",
+                "KANBAN_BOARD"
+        );
     }
 }

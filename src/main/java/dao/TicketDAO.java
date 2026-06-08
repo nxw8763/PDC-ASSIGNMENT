@@ -1,7 +1,6 @@
 package dao;
 
 import database.DatabaseConnection;
-import model.*;
 import model.enums.Priority;
 import model.enums.Status;
 import model.tickets.Comment;

@@ -1,7 +1,6 @@
 package service;
 
 import dao.UserDAO;
-import model.*;
 import model.enums.AuditAction;
 import model.enums.AuditEntity;
 import model.users.Admin;

@@ -8,7 +8,6 @@ import java.sql.Statement;
 public class DatabaseInitializer {
 
 	public static void initialize() {
-		//resetDatabase();
 	    try (
 	            Connection conn = DatabaseConnection.getConnection();
 	            Statement stmt = conn.createStatement()

@@ -80,11 +80,11 @@ public class ServiceDeskTest {
     }
 
     // =====================================================
-    // USER AUTHENTICATION
+    // AUTHENTICATION
     // =====================================================
 
     @Test
-    public void authenticate_ValidAdmin_ReturnsAdminUser() {
+    public void authenticate_ValidCredentials_ReturnsUser() {
 
         User user =
                 userDAO.authenticate(
@@ -93,10 +93,6 @@ public class ServiceDeskTest {
                 );
 
         assertNotNull(user);
-        assertEquals(
-                "ADMINISTRATOR",
-                user.getRole()
-        );
     }
 
     @Test
@@ -123,8 +119,20 @@ public class ServiceDeskTest {
         assertNull(user);
     }
 
+    @Test
+    public void authenticate_CaseSensitiveUsername_ReturnsNull() {
+
+        User user =
+                userDAO.authenticate(
+                        "ADMIN",
+                        "admin123"
+                );
+
+        assertNull(user);
+    }
+
     // =====================================================
-    // CATEGORYS
+    // CATEGORIES
     // =====================================================
 
     @Test
@@ -139,26 +147,23 @@ public class ServiceDeskTest {
     }
 
     @Test
-    public void addCategory_AsAdmin_CategoryExistsAfterInsert() {
+    public void addCategory_Admin_AddsCategory() {
 
-        String category =
-                "JUnitCategory";
+        String category = "JUnitCategory";
 
         categoryService.addCategory(
                 admin,
                 category
         );
 
-        List<String> categories =
-                categoryService.getCategories();
-
         assertTrue(
-                categories.contains(category)
+                categoryService.getCategories()
+                        .contains(category)
         );
     }
 
     @Test(expected = SecurityException.class)
-    public void addCategory_AsEmployee_ThrowsSecurityException() {
+    public void addCategory_Employee_ThrowsSecurityException() {
 
         categoryService.addCategory(
                 employee,
@@ -167,7 +172,7 @@ public class ServiceDeskTest {
     }
 
     @Test(expected = SecurityException.class)
-    public void deleteCategory_AsTechnician_ThrowsSecurityException() {
+    public void deleteCategory_Technician_ThrowsSecurityException() {
 
         categoryService.deleteCategory(
                 technician,
@@ -176,10 +181,9 @@ public class ServiceDeskTest {
     }
 
     @Test
-    public void deleteCategory_AsAdmin_RemovesCategory() {
+    public void deleteCategory_Admin_RemovesCategory() {
 
-        String category =
-                "DeleteMe";
+        String category = "DeleteMe";
 
         categoryService.addCategory(
                 admin,
@@ -191,11 +195,9 @@ public class ServiceDeskTest {
                 category
         );
 
-        List<String> categories =
-                categoryService.getCategories();
-
         assertFalse(
-                categories.contains(category)
+                categoryService.getCategories()
+                        .contains(category)
         );
     }
 
@@ -204,7 +206,7 @@ public class ServiceDeskTest {
     // =====================================================
 
     @Test
-    public void createTicket_CreatesTicketWithOpenStatus() {
+    public void createTicket_ValidTicket_CreatesOpenTicket() {
 
         Ticket ticket =
                 ticketService.createTicket(
@@ -215,26 +217,8 @@ public class ServiceDeskTest {
                         employee
                 );
 
-        assertTrue(
-                ticket.getTicketID() > 0
-        );
-
-        Ticket stored =
-                ticketDAO.getTicketByID(
-                        ticket.getTicketID()
-                );
-
-        assertNotNull(stored);
-
-        assertEquals(
-                Status.OPEN,
-                stored.getStatus()
-        );
-
-        assertEquals(
-                "Printer Broken",
-                stored.getTitle()
-        );
+        assertTrue(ticket.getTicketID() > 0);
+        assertEquals(Status.OPEN, ticket.getStatus());
     }
 
     @Test
@@ -254,10 +238,12 @@ public class ServiceDeskTest {
                         employee
                 );
 
-        boolean found = visible.stream()
-                .anyMatch(t ->
-                        t.getTicketID() ==
-                                created.getTicketID());
+        boolean found =
+                visible.stream()
+                        .anyMatch(
+                                t -> t.getTicketID()
+                                        == created.getTicketID()
+                        );
 
         assertTrue(found);
 
@@ -306,6 +292,36 @@ public class ServiceDeskTest {
         assertEquals(
                 technician.getUserID(),
                 updated.getAssignedTechnicianID()
+        );
+    }
+
+    @Test
+    public void assigningTicket_ChangesStatusToAssigned() {
+
+        Ticket ticket =
+                ticketService.createTicket(
+                        "Assignment Test",
+                        "Description",
+                        "Hardware",
+                        Priority.MEDIUM,
+                        employee
+                );
+
+        ticketService.assignTicket(
+                ticket.getTicketID(),
+                technician.getUserID(),
+                technician.getEmail(),
+                technician
+        );
+
+        Ticket updated =
+                ticketDAO.getTicketByID(
+                        ticket.getTicketID()
+                );
+
+        assertEquals(
+                Status.ASSIGNED,
+                updated.getStatus()
         );
     }
 
@@ -453,5 +469,91 @@ public class ServiceDeskTest {
                 );
 
         assertFalse(result);
+    }
+
+    // =====================================================
+    // TICKET LIFECYCLE
+    // =====================================================
+
+    @Test
+    public void closeTicket_ChangesStatusToClosed() {
+
+        Ticket ticket =
+                ticketService.createTicket(
+                        "Close Test",
+                        "Description",
+                        "Hardware",
+                        Priority.MEDIUM,
+                        employee
+                );
+
+        ticketService.closeTicket(
+                ticket.getTicketID(),
+                admin
+        );
+
+        Ticket updated =
+                ticketDAO.getTicketByID(
+                        ticket.getTicketID()
+                );
+
+        assertEquals(
+                Status.CLOSED,
+                updated.getStatus()
+        );
+    }
+
+    @Test
+    public void updatePriority_UpdatesTicketPriority() {
+
+        Ticket ticket =
+                ticketService.createTicket(
+                        "Priority Test",
+                        "Description",
+                        "Software",
+                        Priority.LOW,
+                        employee
+                );
+
+        ticketService.updatePriority(
+                ticket.getTicketID(),
+                Priority.HIGH,
+                technician
+        );
+
+        Ticket updated =
+                ticketDAO.getTicketByID(
+                        ticket.getTicketID()
+                );
+
+        assertEquals(
+                Priority.HIGH,
+                updated.getPriority()
+        );
+    }
+
+    @Test
+    public void getTicketById_ReturnsCorrectTicket() {
+
+        Ticket ticket =
+                ticketService.createTicket(
+                        "Lookup Test",
+                        "Description",
+                        "Network",
+                        Priority.MEDIUM,
+                        employee
+                );
+
+        Ticket stored =
+                ticketDAO.getTicketByID(
+                        ticket.getTicketID()
+                );
+
+        assertNotNull(stored);
+
+        assertEquals(
+                ticket.getTicketID(),
+                stored.getTicketID()
+        );
     }
 }

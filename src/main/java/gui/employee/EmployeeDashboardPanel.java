@@ -1,29 +1,25 @@
 package gui.employee;
 
 import gui.abstracts.AbstractDashboardPanel;
+import main.AppContext;
 import model.users.Employee;
-import service.CategoryService;
-import service.TicketService;
 
 public class EmployeeDashboardPanel extends AbstractDashboardPanel {
 
     private final Employee employee;
-    private final TicketService ticketService;
-    private final CategoryService categoryService;
+    private final AppContext context;
 
     public static final String MY_TICKETS = "MY_TICKETS";
     public static final String CREATE_TICKET = "CREATE_TICKET";
 
     public EmployeeDashboardPanel(
             Employee employee,
-            TicketService ticketService,
-            CategoryService categoryService
+            AppContext context
     ) {
         super(employee);
 
         this.employee = employee;
-        this.ticketService = ticketService;
-        this.categoryService = categoryService;
+        this.context = context;
 
         buildPages();
         buildNavigation();
@@ -34,12 +30,12 @@ public class EmployeeDashboardPanel extends AbstractDashboardPanel {
 
         registerPage(
                 MY_TICKETS,
-                new MyTicketsPanel(employee, ticketService)
+                new MyTicketsPanel(employee, context.getTicketController())
         );
 
         registerPage(
                 CREATE_TICKET,
-                new CreateTicketPanel(employee, ticketService, categoryService)
+                new CreateTicketPanel(employee, context.getTicketController(), context.getCategoryController())
         );
     }
 

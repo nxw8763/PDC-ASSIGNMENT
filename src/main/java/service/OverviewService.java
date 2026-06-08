@@ -12,7 +12,11 @@ import java.util.Map;
 
 public class OverviewService {
 
-    private final OverviewDAO overviewDAO = new OverviewDAO();
+    private final OverviewDAO overviewDAO;
+    
+    public OverviewService(OverviewDAO overviewDAO) {
+    	this.overviewDAO = overviewDAO;
+    }
 
     private void validateAdmin(Admin admin) {
         if (admin == null) {

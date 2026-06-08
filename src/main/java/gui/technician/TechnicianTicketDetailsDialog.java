@@ -1,45 +1,63 @@
 package gui.technician;
 
-import model.*;
-import model.enums.Priority;
-import model.enums.Status;
-import model.tickets.Ticket;
-import model.users.Technician;
-import service.TicketService;
+import gui.abstracts.AbstractTicketDetailsDialog;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDateTime;
 
-import gui.abstracts.AbstractTicketDetailsDialog;
+public class TechnicianTicketDetailsDialog
+        extends AbstractTicketDetailsDialog {
 
-public class TechnicianTicketDetailsDialog extends AbstractTicketDetailsDialog {
-
-    private final Technician technician;
-    private final TicketService ticketService;
+    private JButton assignButton;
+    private JButton unassignButton;
+    private JButton statusButton;
+    private JButton priorityButton;
+    private JButton commentButton;
 
     public TechnicianTicketDetailsDialog(
             Window owner,
-            Ticket ticket,
-            Technician technician,
-            TicketService ticketService
-    ) {
-        super(owner, ticket);
+            int ticketId) {
 
-        this.technician = technician;
-        this.ticketService = ticketService;
+        super(
+                owner,
+                ticketId
+        );
     }
 
     @Override
     protected JPanel createActionPanel() {
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel panel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT
+                        )
+                );
 
-        JButton assignButton = new JButton("Assign To Me");
-        JButton unassignButton = new JButton("Unassign");
-        JButton statusButton = new JButton("Change Status");
-        JButton priorityButton = new JButton("Change Priority");
-        JButton commentButton = new JButton("Add Comment");
+        assignButton =
+                new JButton(
+                        "Assign To Me"
+                );
+
+        unassignButton =
+                new JButton(
+                        "Unassign"
+                );
+
+        statusButton =
+                new JButton(
+                        "Change Status"
+                );
+
+        priorityButton =
+                new JButton(
+                        "Change Priority"
+                );
+
+        commentButton =
+                new JButton(
+                        "Add Comment"
+                );
 
         panel.add(assignButton);
         panel.add(unassignButton);
@@ -47,110 +65,46 @@ public class TechnicianTicketDetailsDialog extends AbstractTicketDetailsDialog {
         panel.add(priorityButton);
         panel.add(commentButton);
 
-        assignButton.addActionListener(e -> assignTicket());
-        unassignButton.addActionListener(e -> unassignTicket());
-        statusButton.addActionListener(e -> changeStatus());
-        priorityButton.addActionListener(e -> changePriority());
-        commentButton.addActionListener(e -> addComment());
-
         return panel;
     }
 
-    private void assignTicket() {
+    public void setAssignAction(
+            Runnable action) {
 
-        ticketService.assignTicket(
-                ticket.getTicketID(),
-                technician.getUserID(),
-                technician.getEmail(),
-                technician
+        assignButton.addActionListener(
+                e -> action.run()
         );
-
-        loadTicket();
     }
 
-    private void unassignTicket() {
+    public void setUnassignAction(
+            Runnable action) {
 
-        ticketService.unassignTicket(
-                ticket.getTicketID(),
-                technician
+        unassignButton.addActionListener(
+                e -> action.run()
         );
-
-        loadTicket();
     }
 
-    private void changeStatus() {
+    public void setStatusAction(
+            Runnable action) {
 
-        Status[] allowed = {
-                Status.ASSIGNED,
-                Status.IN_PROGRESS,
-                Status.RESOLVED
-        };
-
-        Status status =
-                (Status) JOptionPane.showInputDialog(
-                        this,
-                        "Select Status",
-                        "Status",
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        allowed,
-                        ticket.getStatus()
-                );
-
-        if (status == null) return;
-
-        ticketService.updateStatus(
-                ticket.getTicketID(),
-                status,
-                technician
+        statusButton.addActionListener(
+                e -> action.run()
         );
-
-        loadTicket();
     }
 
-    private void changePriority() {
+    public void setPriorityAction(
+            Runnable action) {
 
-        Priority priority =
-                (Priority) JOptionPane.showInputDialog(
-                        this,
-                        "Select Priority",
-                        "Priority",
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        Priority.values(),
-                        ticket.getPriority()
-                );
-
-        if (priority == null) return;
-
-        ticketService.updatePriority(
-                ticket.getTicketID(),
-                priority,
-                technician
+        priorityButton.addActionListener(
+                e -> action.run()
         );
-
-        loadTicket();
     }
 
-    private void addComment() {
+    public void setCommentAction(
+            Runnable action) {
 
-        String title =
-                JOptionPane.showInputDialog(this, "Comment Title");
-
-        if (title == null || title.isBlank()) return;
-
-        String description =
-                JOptionPane.showInputDialog(this, "Comment Description");
-
-        if (description == null || description.isBlank()) return;
-
-        ticketService.addComment(
-                ticket.getTicketID(),
-                title,
-                description,
-                technician
+        commentButton.addActionListener(
+                e -> action.run()
         );
-
-        loadComments();
     }
 }

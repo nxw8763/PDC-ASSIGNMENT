@@ -1,7 +1,6 @@
 package dao;
 
 import database.DatabaseConnection;
-import model.*;
 import model.users.Admin;
 import model.users.Employee;
 import model.users.Technician;

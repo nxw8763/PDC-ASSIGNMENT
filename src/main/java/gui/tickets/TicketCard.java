@@ -1,19 +1,18 @@
 package gui.tickets;
 
+import dto.TicketCardDTO;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
-import model.tickets.Ticket;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 
 public class TicketCard extends JPanel {
 
-    private final Ticket ticket;
+    private final TicketCardDTO ticket;
 
     public TicketCard(
-            Ticket ticket,
+            TicketCardDTO ticket,
             Runnable onClick
     ) {
 
@@ -44,11 +43,16 @@ public class TicketCard extends JPanel {
         );
 
         JLabel titleLabel =
-                new JLabel(ticket.getTitle());
+                new JLabel(
+                        ticket.getTitle()
+                );
 
         titleLabel.setFont(
                 titleLabel.getFont()
-                        .deriveFont(Font.BOLD, 16f)
+                        .deriveFont(
+                                Font.BOLD,
+                                16f
+                        )
         );
 
         content.add(titleLabel);
@@ -56,32 +60,44 @@ public class TicketCard extends JPanel {
 
         content.add(
                 new JLabel(
-                        "Ticket #" + ticket.getTicketID()
+                        "Ticket #" +
+                                ticket.getTicketId()
                 )
         );
 
         content.add(
                 new JLabel(
-                        "Priority: " + ticket.getPriority()
+                        "Priority: " +
+                                ticket.getPriority()
                 )
         );
 
         content.add(
                 new JLabel(
-                        "Category: " + ticket.getCategory()
+                        "Category: " +
+                                ticket.getCategory()
                 )
         );
 
         content.add(
                 new JLabel(
-                        "Technician Email: " + (ticket.getAssignedTechnicianEmail() == null ? "Unassigned" : ticket.getAssignedTechnicianEmail())
+                        "Technician Email: " +
+                                (
+                                        ticket.getAssignedTechnician() == null
+                                                ? "Unassigned"
+                                                : ticket.getAssignedTechnician()
+                                )
                 )
         );
 
-        add(content, BorderLayout.CENTER);
+        add(
+                content,
+                BorderLayout.CENTER
+        );
 
         MouseAdapter listener =
                 new MouseAdapter() {
+
                     @Override
                     public void mouseClicked(
                             java.awt.event.MouseEvent e
@@ -97,7 +113,7 @@ public class TicketCard extends JPanel {
         }
     }
 
-    public Ticket getTicket() {
+    public TicketCardDTO getTicket() {
         return ticket;
     }
 }

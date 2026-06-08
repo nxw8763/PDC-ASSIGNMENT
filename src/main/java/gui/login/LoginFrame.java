@@ -1,31 +1,20 @@
 package gui.login;
 
-import javax.swing.*;
-
-import dao.UserDAO;
-import service.CategoryService;
-import service.TicketService;
-import service.UserService;
+import javax.swing.JFrame;
 
 public class LoginFrame extends JFrame {
 
-    public LoginFrame(TicketService ticketService, CategoryService categoryService, UserService userService) {
+    public LoginFrame() {
 
         super("Service Desk Login");
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 350);
-        setLocationRelativeTo(null);
-
-        setContentPane(
-                new LoginPanel(
-                        this,
-                        ticketService,
-                        categoryService,
-                        userService
-                )
+        setDefaultCloseOperation(
+                JFrame.EXIT_ON_CLOSE
         );
 
+        setSize(500, 350);
+
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 }

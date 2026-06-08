@@ -1,86 +1,140 @@
 package gui.abstracts;
 
+import dto.CommentDTO;
+import dto.TicketDetailsDTO;
+import gui.employee.TicketDetailsView;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
-import model.tickets.Comment;
-import model.tickets.Ticket;
-
 import java.awt.*;
-import java.time.format.DateTimeFormatter;
 
-public abstract class AbstractTicketDetailsDialog extends JDialog {
+public abstract class AbstractTicketDetailsDialog
+        extends JDialog
+        implements TicketDetailsView {
 
-    protected final Ticket ticket;
+    protected final int ticketId;
 
     private JLabel titleLabel;
+
     private JLabel categoryLabel;
+
     private JLabel priorityLabel;
+
     private JLabel statusLabel;
+
     private JLabel technicianLabel;
+
     private JLabel createdLabel;
 
     private JTextArea descriptionArea;
 
     protected JPanel commentsPanel;
+    
+    protected JButton commentButton;
 
     public AbstractTicketDetailsDialog(
             Window owner,
-            Ticket ticket
-    ) {
+            int ticketId) {
+
         super(owner);
 
-        this.ticket = ticket;
+        this.ticketId = ticketId;
 
         initialise();
     }
 
     private void initialise() {
 
-        setTitle("Ticket #" + ticket.getTicketID());
+        setTitle(
+                "Ticket #" + ticketId
+        );
 
         setModal(true);
 
-        setSize(900, 700);
+        setSize(
+                900,
+                700
+        );
 
-        setLocationRelativeTo(getOwner());
+        setLocationRelativeTo(
+                getOwner()
+        );
 
-        setLayout(new BorderLayout());
+        setLayout(
+                new BorderLayout()
+        );
 
-        add(createHeaderPanel(), BorderLayout.NORTH);
-        add(createCenterPanel(), BorderLayout.CENTER);
-        add(createActionPanel(), BorderLayout.SOUTH);
+        add(
+                createHeaderPanel(),
+                BorderLayout.NORTH
+        );
 
-        loadTicket();
+        add(
+                createCenterPanel(),
+                BorderLayout.CENTER
+        );
+
+        add(
+                createActionPanel(),
+                BorderLayout.SOUTH
+        );
     }
 
     private JPanel createHeaderPanel() {
 
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel =
+                new JPanel(
+                        new BorderLayout()
+                );
 
-        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
-
-        titleLabel = new JLabel();
-
-        titleLabel.setFont(
-                titleLabel.getFont().deriveFont(
-                        Font.BOLD,
-                        24f
+        panel.setBorder(
+                new EmptyBorder(
+                        20,
+                        20,
+                        20,
+                        20
                 )
         );
 
-        panel.add(titleLabel, BorderLayout.WEST);
+        titleLabel =
+                new JLabel();
+
+        titleLabel.setFont(
+                titleLabel.getFont()
+                        .deriveFont(
+                                Font.BOLD,
+                                24f
+                        )
+        );
+
+        panel.add(
+                titleLabel,
+                BorderLayout.WEST
+        );
 
         return panel;
     }
 
     private JScrollPane createCenterPanel() {
 
-        JPanel panel = new JPanel();
+        JPanel panel =
+                new JPanel();
 
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(
+                new BoxLayout(
+                        panel,
+                        BoxLayout.Y_AXIS
+                )
+        );
 
-        panel.setBorder(new EmptyBorder(0, 20, 20, 20));
+        panel.setBorder(
+                new EmptyBorder(
+                        0,
+                        20,
+                        20,
+                        20
+                )
+        );
 
         categoryLabel = new JLabel();
         priorityLabel = new JLabel();
@@ -88,39 +142,45 @@ public abstract class AbstractTicketDetailsDialog extends JDialog {
         technicianLabel = new JLabel();
         createdLabel = new JLabel();
 
-        descriptionArea = new JTextArea();
+        descriptionArea =
+                new JTextArea();
 
         descriptionArea.setEditable(false);
+
         descriptionArea.setLineWrap(true);
+
         descriptionArea.setWrapStyleWord(true);
 
         panel.add(categoryLabel);
-        panel.add(Box.createVerticalStrut(5));
-
         panel.add(priorityLabel);
-        panel.add(Box.createVerticalStrut(5));
-
         panel.add(statusLabel);
-        panel.add(Box.createVerticalStrut(5));
-
         panel.add(technicianLabel);
-        panel.add(Box.createVerticalStrut(5));
-
         panel.add(createdLabel);
+
         panel.add(Box.createVerticalStrut(15));
 
-        panel.add(new JLabel("Description"));
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(
+                new JLabel(
+                        "Description"
+                )
+        );
 
-        panel.add(new JScrollPane(descriptionArea));
+        panel.add(
+                new JScrollPane(
+                        descriptionArea
+                )
+        );
 
         panel.add(Box.createVerticalStrut(20));
 
-        panel.add(new JLabel("Comments"));
+        panel.add(
+                new JLabel(
+                        "Comments"
+                )
+        );
 
-        panel.add(Box.createVerticalStrut(10));
-
-        commentsPanel = new JPanel();
+        commentsPanel =
+                new JPanel();
 
         commentsPanel.setLayout(
                 new BoxLayout(
@@ -134,106 +194,140 @@ public abstract class AbstractTicketDetailsDialog extends JDialog {
         return new JScrollPane(panel);
     }
 
-    protected void loadTicket() {
+    @Override
+    public int getTicketId() {
 
-        titleLabel.setText(ticket.getTitle());
+        return ticketId;
+    }
+
+    @Override
+    public void displayTicket(
+            TicketDetailsDTO dto) {
+
+        titleLabel.setText(
+                dto.getTitle()
+        );
 
         categoryLabel.setText(
-                "Category: " + ticket.getCategory()
+                "Category: "
+                        + dto.getCategory()
         );
 
         priorityLabel.setText(
-                "Priority: " + ticket.getPriority()
+                "Priority: "
+                        + dto.getPriority()
         );
 
         statusLabel.setText(
-                "Status: " + ticket.getStatus()
+                "Status: "
+                        + dto.getStatus()
         );
 
         technicianLabel.setText(
                 "Assigned Technician: "
-                        + (ticket.getAssignedTechnicianEmail() == null
-                        ? "Unassigned"
-                        : String.valueOf(ticket.getAssignedTechnicianEmail()))
+                        + dto.getAssignedTechnician()
         );
 
         createdLabel.setText(
                 "Created: "
-                        + ticket.getCreatedDate()
-                        .format(
-                                DateTimeFormatter.ofPattern(
-                                        "dd/MM/yyyy HH:mm"
-                                )
-                        )
+                        + dto.getCreatedDate()
         );
 
         descriptionArea.setText(
-                ticket.getDescription()
+                dto.getDescription()
         );
 
-        loadComments();
+        displayComments(
+                dto
+        );
     }
 
-    protected void loadComments() {
+    private void displayComments(
+            TicketDetailsDTO dto) {
 
         commentsPanel.removeAll();
 
-        for (Comment comment : ticket.getComments()) {
+        for (CommentDTO comment :
+                dto.getComments()) {
 
-            JPanel card = new JPanel(
-                    new BorderLayout()
-            );
+            JPanel card =
+                    new JPanel(
+                            new BorderLayout()
+                    );
 
-            card.setBorder(
-                    BorderFactory.createCompoundBorder(
-                            BorderFactory.createLineBorder(
-                                    Color.LIGHT_GRAY
-                            ),
-                            new EmptyBorder(
-                                    10,
-                                    10,
-                                    10,
-                                    10
-                            )
-                    )
-            );
+            JLabel title =
+                    new JLabel(
+                            comment.getTitle()
+                    );
 
-            JLabel title = new JLabel(
-                    comment.getTitle()
-            );
+            JTextArea body =
+                    new JTextArea(
+                            comment.getDescription()
+                    );
 
-            title.setFont(
-                    title.getFont()
-                            .deriveFont(Font.BOLD)
-            );
-
-            JTextArea body = new JTextArea(
-                    comment.getDescription()
-            );
+            JLabel footer =
+                    new JLabel(
+                            comment.getCreatedBy()
+                                    + " | "
+                                    + comment.getCreatedDate()
+                    );
 
             body.setEditable(false);
-            body.setLineWrap(true);
-            body.setWrapStyleWord(true);
 
-            JLabel footer = new JLabel(
-                    comment.getCreatedByUser()
-                            + " | "
-                            + comment.getCreatedDate()
+            card.add(
+                    title,
+                    BorderLayout.NORTH
             );
 
-            card.add(title, BorderLayout.NORTH);
-            card.add(body, BorderLayout.CENTER);
-            card.add(footer, BorderLayout.SOUTH);
+            card.add(
+                    body,
+                    BorderLayout.CENTER
+            );
+
+            card.add(
+                    footer,
+                    BorderLayout.SOUTH
+            );
 
             commentsPanel.add(card);
-
-            commentsPanel.add(
-                    Box.createVerticalStrut(10)
-            );
         }
 
         commentsPanel.revalidate();
         commentsPanel.repaint();
+    }
+
+    @Override
+    public void showMessage(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message
+        );
+    }
+
+    @Override
+    public void showError(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+    
+    @Override
+    public void setAddCommentAction(
+            Runnable action) {
+
+        if (commentButton != null) {
+
+            commentButton.addActionListener(
+                    e -> action.run()
+            );
+        }
     }
 
     protected abstract JPanel createActionPanel();

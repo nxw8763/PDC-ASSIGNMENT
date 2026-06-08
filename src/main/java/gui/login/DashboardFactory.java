@@ -1,54 +1,64 @@
 package gui.login;
 
+import controller.NavigationController;
+
 import gui.abstracts.AbstractDashboardPanel;
+import gui.admin.AdminDashboardPanel;
 import gui.employee.EmployeeDashboardPanel;
 import gui.technician.TechnicianDashboardPanel;
-import gui.admin.AdminDashboardPanel;
+
+import main.AppContext;
 
 import model.users.Admin;
 import model.users.Employee;
 import model.users.Technician;
 import model.users.User;
-import service.UserService;
-import service.TicketService;
-import service.CategoryService;
-
-import dao.CategoryDAO;
-import dao.TicketDAO;
 
 public class DashboardFactory {
 
     public static AbstractDashboardPanel createDashboard(
             User user,
-            TicketService ticketService,
-            CategoryService categoryService,
-            UserService userService
+            AppContext context,
+            NavigationController navigation
     ) {
 
-        if (user instanceof Employee emp) {
-            return new EmployeeDashboardPanel(
-                    emp,
-                    ticketService,
-                    categoryService
+        AbstractDashboardPanel dashboard;
+
+        if (user instanceof Employee employee) {
+
+            dashboard =
+                    new EmployeeDashboardPanel(
+                            employee,
+                            context
+                    );
+
+        } else if (user instanceof Technician technician) {
+
+            dashboard =
+                    new TechnicianDashboardPanel(
+                            technician,
+                            context
+                    );
+
+        } else if (user instanceof Admin admin) {
+
+            dashboard =
+                    new AdminDashboardPanel(
+                            admin,
+                            context
+                    );
+
+        } else {
+
+            throw new IllegalArgumentException(
+                    "Unknown user type."
             );
         }
 
-        if (user instanceof Technician tech) {
-            return new TechnicianDashboardPanel(
-                    tech,
-                   	ticketService
-            );
-        }
+        dashboard.setLogoutAction(
+                navigation::showLogin
+        );
 
-        if (user instanceof Admin admin) {
-            return new AdminDashboardPanel(
-                    admin,
-                    userService,
-                    ticketService,
-                    categoryService
-            );
-        }
-
-        throw new IllegalArgumentException("Unknown user type");
+        return dashboard;
     }
 }

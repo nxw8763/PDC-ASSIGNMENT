@@ -1,137 +1,164 @@
 package gui.employee;
 
-import model.tickets.Ticket;
+import controller.TicketController;
 import model.users.Employee;
-import service.TicketService;
-import gui.tickets.TicketCard;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Comparator;
 import java.util.List;
 
-public class MyTicketsPanel extends JPanel {
+public class MyTicketsPanel
+        extends JPanel
+        implements MyTicketsView {
 
     private final Employee employee;
-    private final TicketService ticketService;
+
+    private final TicketController controller;
 
     private JPanel cardsPanel;
+
     private JComboBox<String> sortBox;
 
-    public MyTicketsPanel(Employee employee,
-                          TicketService ticketService) {
+    public MyTicketsPanel(
+            Employee employee,
+            TicketController controller) {
 
         this.employee = employee;
-        this.ticketService = ticketService;
+
+        this.controller = controller;
 
         initialise();
     }
 
     private void initialise() {
 
-        setLayout(new BorderLayout(15, 15));
+        setLayout(
+                new BorderLayout(
+                        15,
+                        15
+                )
+        );
 
-        JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel topPanel =
+                new JPanel(
+                        new BorderLayout()
+                );
 
-        JLabel title = new JLabel("My Tickets");
-        title.setFont(title.getFont().deriveFont(Font.BOLD, 24f));
+        JLabel title =
+                new JLabel(
+                        "My Tickets"
+                );
 
-        topPanel.add(title, BorderLayout.WEST);
+        title.setFont(
+                title.getFont()
+                        .deriveFont(
+                                Font.BOLD,
+                                24f
+                        )
+        );
 
-        sortBox = new JComboBox<>(new String[]{
-                "Newest First",
-                "Oldest First",
-                "Priority",
-                "Status",
-                "Category"
-        });
+        topPanel.add(
+                title,
+                BorderLayout.WEST
+        );
 
-        topPanel.add(sortBox, BorderLayout.EAST);
+        sortBox =
+                new JComboBox<>(
+                        new String[] {
+                                "Newest First",
+                                "Oldest First",
+                                "Priority",
+                                "Status",
+                                "Category"
+                        }
+                );
 
-        add(topPanel, BorderLayout.NORTH);
+        topPanel.add(
+                sortBox,
+                BorderLayout.EAST
+        );
 
-        cardsPanel = new JPanel(new GridLayout(0, 3, 15, 15));
+        add(
+                topPanel,
+                BorderLayout.NORTH
+        );
 
-        JScrollPane scrollPane = new JScrollPane(cardsPanel);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        cardsPanel =
+                new JPanel(
+                        new GridLayout(
+                                0,
+                                3,
+                                15,
+                                15
+                        )
+                );
 
-        add(scrollPane, BorderLayout.CENTER);
+        JScrollPane scrollPane =
+                new JScrollPane(
+                        cardsPanel
+                );
 
-        sortBox.addActionListener(e -> loadTickets());
+        scrollPane
+                .getVerticalScrollBar()
+                .setUnitIncrement(16);
 
-        loadTickets();
+        add(
+                scrollPane,
+                BorderLayout.CENTER
+        );
+
+        sortBox.addActionListener(
+                e -> controller.loadEmployeeTickets(
+                        employee,
+                        this,
+                        this
+                )
+        );
+
+        controller.loadEmployeeTickets(
+                employee,
+                this,
+                this
+        );
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) loadTickets();
+    public void setVisible(
+            boolean visible) {
+
+        super.setVisible(
+                visible
+        );
+
+        if (visible) {
+
+            controller.loadEmployeeTickets(
+                    employee,
+                    this,
+                    this
+            );
+        }
     }
 
-    private void loadTickets() {
+    @Override
+    public String getSelectedSort() {
+
+        return (String)
+                sortBox.getSelectedItem();
+    }
+
+    @Override
+    public void displayTickets(
+            List<Component> cards) {
 
         cardsPanel.removeAll();
 
-        List<Ticket> tickets =
-                ticketService.getVisibleTickets(employee);
+        for (Component card : cards) {
 
-        applySorting(tickets);
-
-        for (Ticket t : tickets) {
-
-        	cardsPanel.add(
-        		    new TicketCard(
-        		            t,
-        		            () -> openTicket(t)
-        		    )
-        		);
+            cardsPanel.add(card);
         }
 
         cardsPanel.revalidate();
         cardsPanel.repaint();
-    }
-
-    private void applySorting(List<Ticket> tickets) {
-
-        String sort = (String) sortBox.getSelectedItem();
-
-        switch (sort) {
-
-            case "Newest First" ->
-                    tickets.sort(Comparator.comparing(Ticket::getCreatedDate).reversed());
-
-            case "Oldest First" ->
-                    tickets.sort(Comparator.comparing(Ticket::getCreatedDate));
-
-            case "Priority" ->
-                    tickets.sort((a, b) ->
-                            Integer.compare(
-                                    b.getPriority().ordinal(),
-                                    a.getPriority().ordinal()
-                            )
-                    );
-
-            case "Status" ->
-                    tickets.sort(Comparator.comparing(Ticket::getStatus));
-
-            case "Category" ->
-                    tickets.sort(Comparator.comparing(Ticket::getCategory));
-        }
-    }
-
-    private void openTicket(Ticket ticket) {
-
-        Window window = SwingUtilities.getWindowAncestor(this);
-
-        EmployeeTicketDetailsDialog dialog =
-                new EmployeeTicketDetailsDialog(
-                        window,
-                        ticket,
-                        employee,
-                        ticketService
-                );
-
-        dialog.setVisible(true);
-        loadTickets();
     }
 }

@@ -1,53 +1,76 @@
 package gui.admin;
 
-import model.AuditLog;
+import controller.AuditController;
+import dto.AuditLogDTO;
 import model.users.Admin;
-import service.AuditService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class AdminAuditLogPanel extends JPanel {
+public class AdminAuditLogPanel
+        extends JPanel
+        implements AuditLogView {
 
     private final Admin admin;
+
+    private final AuditController controller;
 
     private JTable auditTable;
     private DefaultTableModel tableModel;
 
-    public AdminAuditLogPanel(Admin admin) {
+    public AdminAuditLogPanel(
+            Admin admin,
+            AuditController controller) {
 
         this.admin = admin;
+        this.controller = controller;
 
         buildUI();
-        loadAuditLogs();
+
+        controller.loadAuditLogs(
+                admin,
+                this
+        );
     }
 
     private void buildUI() {
 
-        setLayout(new BorderLayout());
+        setLayout(
+                new BorderLayout()
+        );
 
-        JLabel titleLabel = new JLabel("Audit Logs");
+        JLabel titleLabel =
+                new JLabel(
+                        "Audit Logs"
+                );
+
         titleLabel.setFont(
-                titleLabel.getFont().deriveFont(
-                        Font.BOLD,
-                        24f
-                )
+                titleLabel.getFont()
+                        .deriveFont(
+                                Font.BOLD,
+                                24f
+                        )
         );
 
         JButton refreshButton =
-                new JButton("Refresh");
+                new JButton(
+                        "Refresh"
+                );
 
         refreshButton.addActionListener(
-                e -> loadAuditLogs()
+                e -> controller.loadAuditLogs(
+                        admin,
+                        this
+                )
         );
 
-        JPanel topPanel = new JPanel(
-                new BorderLayout()
-        );
+        JPanel topPanel =
+                new JPanel(
+                        new BorderLayout()
+                );
 
         topPanel.add(
                 titleLabel,
@@ -66,7 +89,7 @@ public class AdminAuditLogPanel extends JPanel {
 
         tableModel =
                 new DefaultTableModel(
-                        new Object[]{
+                        new Object[] {
                                 "Audit ID",
                                 "User ID",
                                 "Action",
@@ -81,75 +104,76 @@ public class AdminAuditLogPanel extends JPanel {
                     @Override
                     public boolean isCellEditable(
                             int row,
-                            int column
-                    ) {
+                            int column) {
+
                         return false;
                     }
                 };
 
         auditTable =
-                new JTable(tableModel);
-        
-        auditTable.getTableHeader().setReorderingAllowed(false);
+                new JTable(
+                        tableModel
+                );
 
-        auditTable.setAutoCreateRowSorter(true);
+        auditTable
+                .getTableHeader()
+                .setReorderingAllowed(
+                        false
+                );
 
-        TableRowSorter<DefaultTableModel> sorter =
-                new TableRowSorter<>(tableModel);
+        auditTable.setAutoCreateRowSorter(
+                true
+        );
 
-        auditTable.setRowSorter(sorter);
+        auditTable.setRowSorter(
+                new TableRowSorter<>(
+                        tableModel
+                )
+        );
 
         auditTable.setSelectionMode(
                 ListSelectionModel.SINGLE_SELECTION
         );
 
-        JScrollPane scrollPane =
-                new JScrollPane(auditTable);
-
         add(
-                scrollPane,
+                new JScrollPane(
+                        auditTable
+                ),
                 BorderLayout.CENTER
         );
     }
 
-    private void loadAuditLogs() {
+    @Override
+    public void displayAuditLogs(
+            List<AuditLogDTO> logs) {
 
         tableModel.setRowCount(0);
 
-        try {
+        for (AuditLogDTO log : logs) {
 
-            List<AuditLog> logs =
-                    AuditService.getAllAuditLogs(admin);
-
-            DateTimeFormatter formatter =
-                    DateTimeFormatter.ofPattern(
-                            "yyyy-MM-dd HH:mm:ss"
-                    );
-
-            for (AuditLog log : logs) {
-
-                tableModel.addRow(
-                        new Object[] {
-                                log.getAuditId(),
-                                log.getUserId(),
-                                log.getAction(),
-                                log.getEntity(),
-                                log.getEntityId(),
-                                log.getDetails(),
-                                log.getTimestamp()
-                                        .format(formatter)
-                        }
-                );
-            }
-
-        } catch (Exception e) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
+            tableModel.addRow(
+                    new Object[] {
+                            log.getAuditId(),
+                            log.getUserId(),
+                            log.getAction(),
+                            log.getEntity(),
+                            log.getEntityId(),
+                            log.getDetails(),
+                            log.getTimestamp()
+                    }
             );
         }
+    }
+
+    @Override
+    public void showError(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }

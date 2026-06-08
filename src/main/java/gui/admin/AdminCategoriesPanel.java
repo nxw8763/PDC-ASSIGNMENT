@@ -1,87 +1,131 @@
 package gui.admin;
 
-import service.CategoryService;
-
-import javax.swing.*;
-
+import controller.CategoryController;
 import model.users.Admin;
 
+import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
-public class AdminCategoriesPanel extends JPanel {
-
-    private final CategoryService service;
-    private final DefaultListModel<String> model = new DefaultListModel<>();
-    private final JList<String> list = new JList<>(model);
+public class AdminCategoriesPanel
+        extends JPanel
+        implements CategoryManagementView {
 
     private final Admin admin;
-    
-    public AdminCategoriesPanel(Admin admin, CategoryService service) {
+    private final CategoryController controller;
 
-        this.service = service;
+    private final DefaultListModel<String> model =
+            new DefaultListModel<>();
+
+    private final JList<String> list =
+            new JList<>(model);
+
+    public AdminCategoriesPanel(
+            Admin admin,
+            CategoryController controller) {
+
         this.admin = admin;
+        this.controller = controller;
 
-        setLayout(new BorderLayout());
-
-        JButton add = new JButton("Add");
-        JButton delete = new JButton("Delete");
-        JButton refresh = new JButton("Refresh");
-
-        JPanel top = new JPanel();
-        top.add(add);
-        top.add(delete);
-        top.add(refresh);
-
-        add(top, BorderLayout.NORTH);
-        add(new JScrollPane(list), BorderLayout.CENTER);
-
-        add.addActionListener(e -> addCategory());
-        delete.addActionListener(e -> deleteCategory());
-        refresh.addActionListener(e -> load());
-
-        load();
+        initialise();
     }
 
-    private void load() {
+    private void initialise() {
+
+        setLayout(
+                new BorderLayout()
+        );
+
+        JButton addButton =
+                new JButton("Add");
+
+        JButton deleteButton =
+                new JButton("Delete");
+
+        JButton refreshButton =
+                new JButton("Refresh");
+
+        JPanel topPanel =
+                new JPanel();
+
+        topPanel.add(addButton);
+        topPanel.add(deleteButton);
+        topPanel.add(refreshButton);
+
+        add(
+                topPanel,
+                BorderLayout.NORTH
+        );
+
+        add(
+                new JScrollPane(list),
+                BorderLayout.CENTER
+        );
+
+        addButton.addActionListener(
+                e -> controller.addCategory(
+                        admin,
+                        this
+                )
+        );
+
+        deleteButton.addActionListener(
+                e -> controller.deleteCategory(
+                        admin,
+                        this
+                )
+        );
+
+        refreshButton.addActionListener(
+                e -> controller.loadCategories(
+                        this
+                )
+        );
+
+        controller.loadCategories(
+                this
+        );
+    }
+
+    @Override
+    public void displayCategories(
+            List<String> categories) {
+
         model.clear();
-        service.getCategories().forEach(model::addElement);
-    }
 
-    private void addCategory() {
+        for (String category : categories) {
 
-        String c = JOptionPane.showInputDialog(this, "Category");
-        if (c == null) return;
-        
-        try {
-        	service.addCategory(admin, c);
-	    } catch (IllegalArgumentException ex) {
-	
-	        JOptionPane.showMessageDialog(
-	                this,
-	                ex.getMessage(),
-	                "Validation Error",
-	                JOptionPane.ERROR_MESSAGE
-	        );
-	    }
-        load();
-    }
-
-    private void deleteCategory() {
-
-        String selected = list.getSelectedValue();
-        if (selected == null) return;
-
-        try {
-        	service.deleteCategory(admin, selected);
-        } catch (IllegalArgumentException ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Validation Error",
-                    JOptionPane.ERROR_MESSAGE
+            model.addElement(
+                    category
             );
         }
-        load();
+    }
+
+    @Override
+    public String getSelectedCategory() {
+
+        return list.getSelectedValue();
+    }
+
+    @Override
+    public void showMessage(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message
+        );
+    }
+
+    @Override
+    public void showError(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }

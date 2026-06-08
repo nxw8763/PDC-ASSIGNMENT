@@ -1,16 +1,18 @@
 package gui.admin.users;
 
-import service.UserService;
-
-import javax.swing.*;
-
+import controller.UserController;
+import dto.UserFormDTO;
 import model.users.Admin;
 
+import javax.swing.*;
 import java.awt.*;
 
-public class CreateUserDialog extends JDialog {
+public class CreateUserDialog
+        extends JDialog
+        implements UserFormView {
 
-    private final UserService userService;
+    private final Admin admin;
+    private final UserController controller;
 
     private final UserFormPanel form =
             new UserFormPanel();
@@ -18,17 +20,21 @@ public class CreateUserDialog extends JDialog {
     public CreateUserDialog(
             Window owner,
             Admin admin,
-            UserService userService
-    ) {
+            UserController controller) {
 
-        super(owner, "Create User", ModalityType.APPLICATION_MODAL);
+        super(
+                owner,
+                "Create User",
+                ModalityType.APPLICATION_MODAL
+        );
 
-        this.userService = userService;
+        this.admin = admin;
+        this.controller = controller;
 
-        initialise(admin);
+        initialise();
     }
 
-    private void initialise(Admin admin) {
+    private void initialise() {
 
         setLayout(new BorderLayout());
 
@@ -38,60 +44,55 @@ public class CreateUserDialog extends JDialog {
                 new JButton("Create User");
 
         createButton.addActionListener(
-                e -> createUser(admin)
-        );
-
-        JPanel bottom = new JPanel(
-                new FlowLayout(
-                        FlowLayout.RIGHT
+                e -> controller.createUser(
+                        admin,
+                        this
                 )
         );
+
+        JPanel bottom =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT
+                        )
+                );
 
         bottom.add(createButton);
 
         add(bottom, BorderLayout.SOUTH);
 
         pack();
+
         setLocationRelativeTo(getOwner());
     }
 
-    private void createUser(Admin admin) {
+    @Override
+    public UserFormDTO getFormData() {
 
-        String username =
-                form.getUsernameField().getText();
+        return new UserFormDTO(
+                form.getUsername(),
+                form.getName(),
+                form.getEmail(),
+                form.getPassword(),
+                form.getRole()
+        );
+    }
 
-        String name =
-                form.getNameField().getText();
+    @Override
+    public void close() {
 
-        String email =
-                form.getEmailField().getText();
+        dispose();
+    }
 
-        String password =
-                new String(
-                        form.getPasswordField().getPassword()
-                );
+    @Override
+    public void showError(
+            String message) {
 
-        String role = (String) form.getRoleBox().getSelectedItem();
-
-        try {
-	        userService.createUser(
-	        		admin,
-	                name,
-	                username,
-	                password,
-	                role,
-	                email
-	        		);
-	        dispose();
-	    } catch (IllegalArgumentException ex) {
-	
-	        JOptionPane.showMessageDialog(
-	                this,
-	                ex.getMessage(),
-	                "Validation Error",
-	                JOptionPane.ERROR_MESSAGE
-	        );
-	    }
-
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }

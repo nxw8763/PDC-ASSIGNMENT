@@ -1,36 +1,50 @@
 package gui.employee;
 
 import model.enums.Priority;
-import model.tickets.Ticket;
 import model.users.Employee;
-import service.CategoryService;
-import service.TicketService;
 
 import javax.swing.*;
+
+import controller.CategoryController;
+import controller.TicketController;
+
 import java.awt.*;
+import java.util.List;
 
-public class CreateTicketPanel extends JPanel {
+public class CreateTicketPanel
+extends JPanel
+implements CreateTicketView,
+           CategorySelectionView {
+	
+	private final Employee employee;
+	
+	private final TicketController ticketController;
+	
+	private final CategoryController categoryController;
+	
+	private JTextField titleField;
+	
+	private JTextArea descriptionArea;
+	
+	private JComboBox<String> categoryBox;
+	
+	private JComboBox<Priority> priorityBox;
+	
+	public CreateTicketPanel(
+	    Employee employee,
+	    TicketController ticketController,
+	    CategoryController categoryController) {
+	
+	this.employee = employee;
+	
+	this.ticketController =
+	        ticketController;
+	
+	this.categoryController =
+	        categoryController;
 
-    private final Employee employee;
-    private final TicketService ticketService;
-    private final CategoryService categoryService;
-
-    private JTextField titleField;
-    private JTextArea descriptionArea;
-    private JComboBox<String> categoryBox;
-    private JComboBox<Priority> priorityBox;
-
-    public CreateTicketPanel(
-            Employee employee,
-            TicketService ticketService,
-            CategoryService categoryService) {
-
-        this.employee = employee;
-        this.ticketService = ticketService;
-        this.categoryService = categoryService;
-
-        initialise();
-    }
+	initialise();
+}
 
     private void initialise() {
 
@@ -110,9 +124,10 @@ public class CreateTicketPanel extends JPanel {
         categoryBox =
                 new JComboBox<>();
 
-        categoryService
-                .getCategories()
-                .forEach(categoryBox::addItem);
+        categoryBox =
+                new JComboBox<>();
+
+        categoryController.loadCategories(this);
 
         categoryBox.setPreferredSize(
                 new Dimension(
@@ -208,7 +223,10 @@ public class CreateTicketPanel extends JPanel {
         );
 
         createButton.addActionListener(
-                e -> createTicket()
+                e -> ticketController.createTicket(
+                        employee,
+                        this
+                )
         );
 
         gbc.gridx = 1;
@@ -333,76 +351,95 @@ public class CreateTicketPanel extends JPanel {
         );
     }
 
-    private void createTicket() {
+    private void addField(
+    		JPanel panel,
+    		GridBagConstraints gbc,
+    		int row,
+    		String label,
+    		Component component) {
+    	
+    	gbc.gridx = 0;
+    	gbc.gridy = row;
+    	
+    	panel.add(
+    			new JLabel(label),
+    			gbc
+    			);
+    	
+    	gbc.gridx = 1;
+    	
+    	panel.add(
+    			component,
+    			gbc
+    			);
+    }
+    
+    @Override
+    public String getTicketTitle() {
 
-        String title =
-                titleField.getText()
-                        .trim();
+        return titleField.getText().trim();
+    }
 
-        String description =
-                descriptionArea.getText()
-                        .trim();
+    @Override
+    public String getTicketDescription() {
 
-        if (title.isBlank()
-                || description.isBlank()) {
+        return descriptionArea.getText().trim();
+    }
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "All fields are required."
-            );
+    @Override
+    public String getSelectedCategory() {
 
-            return;
-        }
+        return (String)
+                categoryBox.getSelectedItem();
+    }
 
-        try {
-	        Ticket ticket =
-	                ticketService.createTicket(
-	                        title,
-	                        description,
-	                        (String) categoryBox.getSelectedItem(),
-	                        (Priority) priorityBox.getSelectedItem(),
-	                        employee
-	                );
-	        JOptionPane.showMessageDialog(
-	        		this,
-	        		"Ticket Created. ID: "
-	        				+ ticket.getTicketID()
-	        		);
-        } catch (IllegalArgumentException ex) {
+    @Override
+    public Priority getSelectedPriority() {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Validation Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-        
+        return (Priority)
+                priorityBox.getSelectedItem();
+    }
+
+    @Override
+    public void showMessage(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message
+        );
+    }
+
+    @Override
+    public void showError(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    @Override
+    public void clearForm() {
 
         titleField.setText("");
+
         descriptionArea.setText("");
     }
+    
+    @Override
+    public void displayCategories(
+            List<String> categories) {
 
-    private void addField(
-            JPanel panel,
-            GridBagConstraints gbc,
-            int row,
-            String label,
-            Component component) {
+        categoryBox.removeAllItems();
 
-        gbc.gridx = 0;
-        gbc.gridy = row;
+        for (String category : categories) {
 
-        panel.add(
-                new JLabel(label),
-                gbc
-        );
-
-        gbc.gridx = 1;
-
-        panel.add(
-                component,
-                gbc
-        );
+            categoryBox.addItem(category);
+        }
     }
+
 }

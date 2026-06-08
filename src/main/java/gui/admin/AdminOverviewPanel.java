@@ -1,16 +1,17 @@
 package gui.admin;
 
-import service.OverviewService;
+import controller.OverviewController;
+import dto.OverviewDTO;
 import model.users.Admin;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
@@ -19,250 +20,493 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
-import java.util.Map;
 
-public class AdminOverviewPanel extends JPanel {
+public class AdminOverviewPanel
+        extends JPanel
+        implements OverviewView {
 
-    private final OverviewService overviewService;
     private final Admin admin;
+    private final OverviewController controller;
 
-    public AdminOverviewPanel(Admin admin) {
+    private OverviewDTO overview;
+
+    public AdminOverviewPanel(
+            Admin admin,
+            OverviewController controller
+    ) {
 
         this.admin = admin;
-        this.overviewService = new OverviewService();
+        this.controller = controller;
 
-        setLayout(new BorderLayout());
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setLayout(
+                new BorderLayout()
+        );
 
-        buildUI();
+        setBorder(
+                new EmptyBorder(
+                        15,
+                        15,
+                        15,
+                        15
+                )
+        );
+
+        controller.loadOverview(
+                admin,
+                this
+        );
     }
 
     @Override
-    public void setVisible(boolean visible) {
+    public void displayOverview(
+            OverviewDTO dto
+    ) {
+
+        this.overview = dto;
+
+        refresh();
+    }
+
+    @Override
+    public void showError(
+            String message
+    ) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    @Override
+    public void setVisible(
+            boolean visible
+    ) {
+
         if (visible) {
-            refresh();
+
+            controller.loadOverview(
+                    admin,
+                    this
+            );
         }
-        super.setVisible(visible);
+
+        super.setVisible(
+                visible
+        );
     }
 
     private void buildUI() {
 
-        JPanel content = new JPanel(new BorderLayout(15, 15));
+        JPanel content =
+                new JPanel(
+                        new BorderLayout(
+                                15,
+                                15
+                        )
+                );
 
-        content.add(createKpiPanel(), BorderLayout.NORTH);
-        content.add(createChartsPanel(), BorderLayout.CENTER);
+        content.add(
+                createKpiPanel(),
+                BorderLayout.NORTH
+        );
 
-        add(content, BorderLayout.CENTER);
+        content.add(
+                createChartsPanel(),
+                BorderLayout.CENTER
+        );
+
+        add(
+                content,
+                BorderLayout.CENTER
+        );
     }
 
-    // ======================
-    // KPI PANEL (CLEAN MAP VERSION)
-    // ======================
+    /*
+     * ==================================================
+     * KPI PANEL
+     * ==================================================
+     */
+
     private JPanel createKpiPanel() {
 
-        Map<String, Integer> counts =
-                overviewService.getStatusCounts(admin);
+        JPanel panel =
+                new JPanel(
+                        new GridLayout(
+                                1,
+                                4,
+                                10,
+                                10
+                        )
+                );
 
-        JPanel panel = new JPanel(new GridLayout(1, 4, 10, 10));
+        panel.add(
+                createKpiCard(
+                        "Open",
+                        overview.getStatusCounts()
+                                .getOrDefault(
+                                        "OPEN",
+                                        0
+                                )
+                )
+        );
 
-        panel.add(createKpiCard("Open", counts.getOrDefault("OPEN", 0)));
-        panel.add(createKpiCard("Assigned", counts.getOrDefault("ASSIGNED", 0)));
-        panel.add(createKpiCard("In Progress", counts.getOrDefault("IN_PROGRESS", 0)));
-        panel.add(createKpiCard("Resolved", counts.getOrDefault("RESOLVED", 0)));
+        panel.add(
+                createKpiCard(
+                        "Assigned",
+                        overview.getStatusCounts()
+                                .getOrDefault(
+                                        "ASSIGNED",
+                                        0
+                                )
+                )
+        );
+
+        panel.add(
+                createKpiCard(
+                        "In Progress",
+                        overview.getStatusCounts()
+                                .getOrDefault(
+                                        "IN_PROGRESS",
+                                        0
+                                )
+                )
+        );
+
+        panel.add(
+                createKpiCard(
+                        "Resolved",
+                        overview.getStatusCounts()
+                                .getOrDefault(
+                                        "RESOLVED",
+                                        0
+                                )
+                )
+        );
 
         return panel;
     }
 
-    private JPanel createKpiCard(String title, int value) {
+    private JPanel createKpiCard(
+            String title,
+            int value
+    ) {
 
-        JPanel card = new JPanel(new BorderLayout());
+        JPanel card =
+                new JPanel(
+                        new BorderLayout()
+                );
 
         card.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(Color.LIGHT_GRAY),
-                        new EmptyBorder(15, 15, 15, 15)
+                        BorderFactory.createLineBorder(
+                                Color.LIGHT_GRAY
+                        ),
+                        new EmptyBorder(
+                                15,
+                                15,
+                                15,
+                                15
+                        )
                 )
         );
 
-        JLabel valueLabel = new JLabel(String.valueOf(value));
-        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel valueLabel =
+                new JLabel(
+                        String.valueOf(
+                                value
+                        )
+                );
 
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        valueLabel.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.BOLD,
+                        28
+                )
+        );
 
-        card.add(valueLabel, BorderLayout.CENTER);
-        card.add(titleLabel, BorderLayout.SOUTH);
+        valueLabel.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        JLabel titleLabel =
+                new JLabel(
+                        title
+                );
+
+        titleLabel.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        titleLabel.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        card.add(
+                valueLabel,
+                BorderLayout.CENTER
+        );
+
+        card.add(
+                titleLabel,
+                BorderLayout.SOUTH
+        );
 
         return card;
     }
 
-    // ======================
-    // CHARTS LAYOUT
-    // ======================
+    /*
+     * ==================================================
+     * CHART LAYOUT
+     * ==================================================
+     */
+
     private JPanel createChartsPanel() {
 
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel =
+                new JPanel(
+                        new GridBagLayout()
+                );
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.BOTH;
+        GridBagConstraints gbc =
+                new GridBagConstraints();
+
+        gbc.insets =
+                new Insets(
+                        8,
+                        8,
+                        8,
+                        8
+                );
+
+        gbc.fill =
+                GridBagConstraints.BOTH;
+
         gbc.weightx = 1;
         gbc.weighty = 1;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(createTicketTrendChart(), gbc);
+
+        panel.add(
+                createTicketTrendChart(),
+                gbc
+        );
 
         gbc.gridx = 1;
-        panel.add(createPriorityChart(), gbc);
+
+        panel.add(
+                createPriorityChart(),
+                gbc
+        );
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        panel.add(createCategoryChart(), gbc);
+
+        panel.add(
+                createCategoryChart(),
+                gbc
+        );
 
         gbc.gridx = 1;
-        panel.add(createStatusChart(), gbc);
+
+        panel.add(
+                createStatusChart(),
+                gbc
+        );
 
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
-        panel.add(createTechnicianChart(), gbc);
+
+        panel.add(
+                createTechnicianChart(),
+                gbc
+        );
 
         return panel;
     }
 
-    // ======================
-    // TREND CHART (MAP CLEANUP)
-    // ======================
     private ChartPanel createTicketTrendChart() {
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-        Map<String, Integer> counts =
-                overviewService.getTicketTrend(admin);
+        DefaultCategoryDataset dataset =
+                new DefaultCategoryDataset();
 
         for (int hour = 0; hour < 24; hour++) {
 
-            String label = String.format("%02d:00", hour);
+            String label =
+                    String.format(
+                            "%02d:00",
+                            hour
+                    );
 
             dataset.addValue(
-                    counts.getOrDefault(label, 0),
+                    overview.getTicketTrend()
+                            .getOrDefault(
+                                    label,
+                                    0
+                            ),
                     "Tickets",
                     label
             );
         }
 
-        JFreeChart chart = ChartFactory.createLineChart(
-                "Tickets Created Today",
-                "Hour",
-                "Tickets",
-                dataset
-        );
+        JFreeChart chart =
+                ChartFactory.createLineChart(
+                        "Tickets Created Today",
+                        "Hour",
+                        "Tickets",
+                        dataset
+                );
 
         return new ChartPanel(chart);
     }
 
-    // ======================
-    // PRIORITY CHART
-    // ======================
     private ChartPanel createPriorityChart() {
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        DefaultCategoryDataset dataset =
+                new DefaultCategoryDataset();
 
-        overviewService.getPriorityCounts(admin)
-                .forEach((k, v) -> dataset.addValue(v, "Tickets", k));
+        overview.getPriorityCounts()
+                .forEach(
+                        (k, v) ->
+                                dataset.addValue(
+                                        v,
+                                        "Tickets",
+                                        k
+                                )
+                );
 
-        JFreeChart chart = ChartFactory.createBarChart(
-                "Priority Distribution",
-                "Priority",
-                "Tickets",
-                dataset
+        JFreeChart chart =
+                ChartFactory.createBarChart(
+                        "Priority Distribution",
+                        "Priority",
+                        "Tickets",
+                        dataset
+                );
+
+        CategoryPlot plot =
+                chart.getCategoryPlot();
+
+        NumberAxis axis =
+                (NumberAxis) plot.getRangeAxis();
+
+        axis.setStandardTickUnits(
+                NumberAxis.createIntegerTickUnits()
         );
-
-        CategoryPlot plot = chart.getCategoryPlot();
-
-        NumberAxis axis = (NumberAxis) plot.getRangeAxis();
-        axis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         return new ChartPanel(chart);
     }
 
-    // ======================
-    // STATUS CHART
-    // ======================
     private ChartPanel createStatusChart() {
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        DefaultCategoryDataset dataset =
+                new DefaultCategoryDataset();
 
-        overviewService.getStatusCounts(admin)
-                .forEach((k, v) -> dataset.addValue(v, "Tickets", k));
+        overview.getStatusCounts()
+                .forEach(
+                        (k, v) ->
+                                dataset.addValue(
+                                        v,
+                                        "Tickets",
+                                        k
+                                )
+                );
 
-        JFreeChart chart = ChartFactory.createBarChart(
-                "Status Distribution",
-                "Status",
-                "Tickets",
-                dataset
+        JFreeChart chart =
+                ChartFactory.createBarChart(
+                        "Status Distribution",
+                        "Status",
+                        "Tickets",
+                        dataset
+                );
+
+        CategoryPlot plot =
+                chart.getCategoryPlot();
+
+        NumberAxis axis =
+                (NumberAxis) plot.getRangeAxis();
+
+        axis.setStandardTickUnits(
+                NumberAxis.createIntegerTickUnits()
         );
-
-        CategoryPlot plot = chart.getCategoryPlot();
-
-        NumberAxis axis = (NumberAxis) plot.getRangeAxis();
-        axis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         return new ChartPanel(chart);
     }
 
-    // ======================
-    // CATEGORY PIE CHART
-    // ======================
     private ChartPanel createCategoryChart() {
 
-        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        DefaultPieDataset<String> dataset =
+                new DefaultPieDataset<>();
 
-        overviewService.getCategoryCounts(admin)
-                .forEach(dataset::setValue);
+        overview.getCategoryCounts()
+                .forEach(
+                        dataset::setValue
+                );
 
-        JFreeChart chart = ChartFactory.createPieChart(
-                "Ticket Categories",
-                dataset,
-                true,
-                true,
-                false
-        );
+        JFreeChart chart =
+                ChartFactory.createPieChart(
+                        "Ticket Categories",
+                        dataset,
+                        true,
+                        true,
+                        false
+                );
 
         return new ChartPanel(chart);
     }
 
-    // ======================
-    // TECHNICIAN CHART
-    // ======================
     private ChartPanel createTechnicianChart() {
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        DefaultCategoryDataset dataset =
+                new DefaultCategoryDataset();
 
-        overviewService.getTechnicianWorkload(admin)
-                .forEach((k, v) -> dataset.addValue(v, "Tickets", k));
+        overview.getTechnicianWorkload()
+                .forEach(
+                        (k, v) ->
+                                dataset.addValue(
+                                        v,
+                                        "Tickets",
+                                        k
+                                )
+                );
 
-        JFreeChart chart = ChartFactory.createBarChart(
-                "Technician Workload",
-                "Technician",
-                "Open Tickets",
-                dataset,
-                PlotOrientation.HORIZONTAL,
-                false,
-                true,
-                false
+        JFreeChart chart =
+                ChartFactory.createBarChart(
+                        "Technician Workload",
+                        "Technician",
+                        "Open Tickets",
+                        dataset,
+                        PlotOrientation.HORIZONTAL,
+                        false,
+                        true,
+                        false
+                );
+
+        CategoryPlot plot =
+                chart.getCategoryPlot();
+
+        NumberAxis axis =
+                (NumberAxis) plot.getRangeAxis();
+
+        axis.setStandardTickUnits(
+                NumberAxis.createIntegerTickUnits()
         );
 
-        CategoryPlot plot = chart.getCategoryPlot();
+        BarRenderer renderer =
+                (BarRenderer) plot.getRenderer();
 
-        NumberAxis axis = (NumberAxis) plot.getRangeAxis();
-        axis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        renderer.setDefaultItemLabelsVisible(
+                true
+        );
 
-        BarRenderer renderer = (BarRenderer) plot.getRenderer();
-        renderer.setDefaultItemLabelsVisible(true);
         renderer.setDefaultItemLabelGenerator(
                 new StandardCategoryItemLabelGenerator()
         );
@@ -270,12 +514,20 @@ public class AdminOverviewPanel extends JPanel {
         return new ChartPanel(chart);
     }
 
-    // ======================
-    // REFRESH
-    // ======================
+    /*
+     * ==================================================
+     * REFRESH
+     * ==================================================
+     */
+
     public void refresh() {
 
+        if (overview == null) {
+            return;
+        }
+
         removeAll();
+
         buildUI();
 
         revalidate();

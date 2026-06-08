@@ -2,7 +2,6 @@ package service;
 
 import dao.TicketDAO;
 
-import model.*;
 import model.enums.*;
 import model.tickets.Comment;
 import model.tickets.Ticket;
@@ -13,7 +12,6 @@ import model.users.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TicketService {
 
@@ -69,6 +67,10 @@ public class TicketService {
         }
 
         return List.of();
+    }
+    
+    public Ticket getTicketById(int ticketID) {
+    	return ticketDAO.getTicketByID(ticketID);
     }
     
     public void assignTicket(int ticketID, int techID, String techEmail, User user) {

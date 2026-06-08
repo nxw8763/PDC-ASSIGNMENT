@@ -1,44 +1,57 @@
 package gui.admin.users;
 
-import service.UserService;
+import controller.UserController;
+import dto.UserDTO;
+import model.users.Admin;
 
 import javax.swing.*;
-
-import model.users.Admin;
-import model.users.User;
-
 import java.awt.*;
+import java.util.List;
 
-public class UserManagementPanel extends JPanel {
+public class UserManagementPanel
+        extends JPanel
+        implements UserManagementView {
 
-    private final UserService userService;
+    private final Admin admin;
+
+    private final UserController controller;
 
     private final UserTableModel tableModel =
             new UserTableModel();
 
-    private final Admin admin;
-    
     private JTable table;
 
     public UserManagementPanel(
-            Admin admin, UserService userService
-    ) {
+            Admin admin,
+            UserController controller) {
 
-        this.userService = userService;
         this.admin = admin;
-        
+        this.controller = controller;
+
         initialise();
-        loadUsers();
+
+        controller.loadUsers(
+                admin,
+                this
+        );
     }
 
     private void initialise() {
 
-        setLayout(new BorderLayout());
+        setLayout(
+                new BorderLayout()
+        );
 
-        table = new JTable(tableModel);
+        table =
+                new JTable(
+                        tableModel
+                );
 
-        table.getTableHeader().setReorderingAllowed(false);
-        
+        table.getTableHeader()
+                .setReorderingAllowed(
+                        false
+                );
+
         add(
                 new JScrollPane(table),
                 BorderLayout.CENTER
@@ -68,103 +81,116 @@ public class UserManagementPanel extends JPanel {
         toolbar.add(deleteButton);
         toolbar.add(refreshButton);
 
-        add(toolbar, BorderLayout.NORTH);
+        add(
+                toolbar,
+                BorderLayout.NORTH
+        );
 
         createButton.addActionListener(
-                e -> createUser()
+                e -> controller.openCreateUser(
+                        admin,
+                        this
+                )
         );
 
         editButton.addActionListener(
-                e -> editUser()
+                e -> {
+
+                    UserDTO user =
+                            getSelectedUser();
+
+                    if (user == null) {
+                        return;
+                    }
+
+                    controller.openEditUser(
+                            admin,
+                            user,
+                            this
+                    );
+                }
         );
 
         deleteButton.addActionListener(
-                e -> deleteUser()
+                e -> {
+
+                    UserDTO user =
+                            getSelectedUser();
+
+                    if (user == null) {
+                        return;
+                    }
+
+                    controller.deleteUser(
+                            admin,
+                            user.getUserId(),
+                            this
+                    );
+                }
         );
 
         refreshButton.addActionListener(
-                e -> loadUsers()
+                e -> controller.loadUsers(
+                        admin,
+                        this
+                )
         );
     }
 
-    private void loadUsers() {
+    private UserDTO getSelectedUser() {
 
-        tableModel.setUsers(
-                userService.getAllUsers(admin)
-        );
-    }
-
-    private User getSelectedUser() {
-
-        int row = table.getSelectedRow();
+        int row =
+                table.getSelectedRow();
 
         if (row < 0) {
             return null;
         }
 
-        return tableModel.getUserAt(row);
-    }
-
-    private void createUser() {
-
-        CreateUserDialog dialog =
-                new CreateUserDialog(
-                        SwingUtilities.getWindowAncestor(this),
-                        admin,
-                        userService
+        row =
+                table.convertRowIndexToModel(
+                        row
                 );
 
-        dialog.setVisible(true);
-
-        loadUsers();
-    }
-
-    private void editUser() {
-
-        User user = getSelectedUser();
-
-        if (user == null) {
-            return;
-        }
-
-        EditUserDialog dialog =
-                new EditUserDialog(
-                        SwingUtilities.getWindowAncestor(this),
-                        admin,
-                        user,
-                        userService
-                );
-
-        dialog.setVisible(true);
-
-        loadUsers();
-    }
-
-    private void deleteUser() {
-
-        User user = getSelectedUser();
-
-        if (user == null) {
-            return;
-        }
-
-        int result =
-                JOptionPane.showConfirmDialog(
-                        this,
-                        "Delete user?",
-                        "Confirm",
-                        JOptionPane.YES_NO_OPTION
-                );
-
-        if (result != JOptionPane.YES_OPTION) {
-            return;
-        }
-
-        userService.removeUser(
-        		admin,
-                user.getUserID()
+        return tableModel.getUserAt(
+                row
         );
+    }
 
-        loadUsers();
+    @Override
+    public void displayUsers(
+            List<UserDTO> users) {
+
+        tableModel.setUsers(
+                users
+        );
+    }
+
+    @Override
+    public Window getParentWindow() {
+
+        return SwingUtilities
+                .getWindowAncestor(this);
+    }
+
+    @Override
+    public void showMessage(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message
+        );
+    }
+
+    @Override
+    public void showError(
+            String message) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }

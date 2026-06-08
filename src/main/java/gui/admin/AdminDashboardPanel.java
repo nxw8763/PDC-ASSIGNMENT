@@ -1,40 +1,25 @@
 package gui.admin;
 
-import java.awt.Window;
-
-import javax.swing.SwingUtilities;
-
 import gui.abstracts.AbstractDashboardPanel;
 import gui.admin.users.UserManagementPanel;
 import gui.tickets.TicketBoardPanel;
-import model.tickets.Ticket;
+import main.AppContext;
 import model.users.Admin;
-import service.CategoryService;
-import service.TicketService;
-import service.UserService;
 
 public class AdminDashboardPanel extends AbstractDashboardPanel {
 
     private final Admin admin;
-
-    private final UserService userService;
-    private final TicketService ticketService;
-    private final CategoryService categoryService;
+    private final AppContext context;
 
     public AdminDashboardPanel(
             Admin admin,
-            UserService userService,
-            TicketService ticketService,
-            CategoryService categoryService
+            AppContext context
     ) {
 
         super(admin);
 
         this.admin = admin;
-
-        this.userService = userService;
-        this.ticketService = ticketService;
-        this.categoryService = categoryService;
+        this.context = context;
 
         buildPages();
         buildNavigation();
@@ -45,31 +30,30 @@ public class AdminDashboardPanel extends AbstractDashboardPanel {
 
         registerPage(
                 "overview",
-                new AdminOverviewPanel(admin)
+                new AdminOverviewPanel(admin, context.getOverviewController())
         );
 
         registerPage(
         	    "users",
-        	    new UserManagementPanel(admin, userService)
+        	    new UserManagementPanel(admin, context.getUserController())
     	);
 
         registerPage(
                 "tickets",
                 new TicketBoardPanel(
                         admin,
-                        userService,
-                        ticketService
+                        context.getTicketController()
         )
         );
 
         registerPage(
                 "categories",
-                new AdminCategoriesPanel(admin, categoryService)
+                new AdminCategoriesPanel(admin, context.getCategoryController())
         );
 
         registerPage(
                 "audits",
-                new AdminAuditLogPanel(admin)
+                new AdminAuditLogPanel(admin, context.getAuditController())
         );
 
         cardLayout.show(contentPanel, "overview");
