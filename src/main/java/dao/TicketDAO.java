@@ -81,6 +81,7 @@ public class TicketDAO {
                 LEFT JOIN USERS u
                     ON t.ASSIGNED_TECHNICIAN_ID = u.USER_ID
                 WHERE t.CREATED_BY_USER_ID = ?
+                     AND t.STATUS <> 'CLOSED'
                 """;
 
         try (Connection conn = DatabaseConnection.getConnection();
