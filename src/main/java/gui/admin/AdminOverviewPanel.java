@@ -336,38 +336,39 @@ public class AdminOverviewPanel
 
     private ChartPanel createTicketTrendChart() {
 
-        DefaultCategoryDataset dataset =
-                new DefaultCategoryDataset();
+    DefaultCategoryDataset dataset =
+            new DefaultCategoryDataset();
 
-        for (int hour = 0; hour < 24; hour++) {
+    for (int hour = 0; hour < 24; hour++) {
 
-            String label =
-                    String.format(
-                            "%02d:00",
-                            hour
-                    );
+        String label =
+                String.format("%02d:00", hour);
 
-            dataset.addValue(
-                    overview.getTicketTrend()
-                            .getOrDefault(
-                                    label,
-                                    0
-                            ),
-                    "Tickets",
-                    label
-            );
-        }
-
-        JFreeChart chart =
-                ChartFactory.createLineChart(
-                        "Tickets Created Today",
-                        "Hour",
-                        "Tickets",
-                        dataset
-                );
-
-        return new ChartPanel(chart);
+        dataset.addValue(
+                overview.getTicketTrend()
+                        .getOrDefault(label, 0),
+                "Tickets",
+                label
+        );
     }
+
+    JFreeChart chart =
+            ChartFactory.createLineChart(
+                    "Tickets Created Today",
+                    "Hour",
+                    "Tickets",
+                    dataset
+            );
+
+    CategoryPlot plot =
+            chart.getCategoryPlot();
+
+    plot.getDomainAxis().setCategoryLabelPositions(
+            org.jfree.chart.axis.CategoryLabelPositions.UP_45
+    );
+
+    return new ChartPanel(chart);
+}
 
     private ChartPanel createPriorityChart() {
 
