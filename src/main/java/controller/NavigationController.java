@@ -29,6 +29,9 @@ public class NavigationController {
                         context.getLoginController()
                 )
         );
+        frame.setTitle(
+            "Service Desk Login"
+        );
         frame.pack();
         frame.setLocationRelativeTo(null);
 
