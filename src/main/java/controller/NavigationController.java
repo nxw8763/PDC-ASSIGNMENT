@@ -29,6 +29,8 @@ public class NavigationController {
                         context.getLoginController()
                 )
         );
+        frame.pack();
+        frame.setLocationRelativeTo(null);
 
         refreshFrame();
     }
@@ -42,7 +44,13 @@ public class NavigationController {
                         this
                 );
 
+        frame.setTitle(
+            "Service Desk - " +
+            user.getRole() +
+            " Dashboard"
+        );
         frame.setContentPane(dashboard);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         refreshFrame();
     }
